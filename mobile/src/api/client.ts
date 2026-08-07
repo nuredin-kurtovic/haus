@@ -13,10 +13,18 @@ import { Platform } from 'react-native';
 import * as Keychain from 'react-native-keychain';
 import type { ApiValidationError } from './types';
 
+/**
+ * DEV_HOST: LAN adresa Maca na kojem radi `php artisan serve --host 0.0.0.0`.
+ * Fizički telefon ne vidi localhost sa Maca, pa dev build na uređaju mora
+ * gađati LAN IP. Radi i na iOS simulatoru (dijeli mrežu sa hostom).
+ * Promijeni kad se promijeni mreža (ipconfig getifaddr en0).
+ */
+const DEV_HOST = '192.168.1.93';
+
 export const API_BASE_URL = Platform.select({
-  ios: 'http://localhost:8000/api/v1',
+  ios: `http://${DEV_HOST}:8000/api/v1`,
   android: 'http://10.0.2.2:8000/api/v1',
-  default: 'http://localhost:8000/api/v1',
+  default: `http://${DEV_HOST}:8000/api/v1`,
 });
 
 /**
