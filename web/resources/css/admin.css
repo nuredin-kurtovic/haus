@@ -1,0 +1,404 @@
+/* HAUS admin (dispečer) površina. Nadograđuje tokens.css i public.css.
+   Učitava se preko AdminLayout.vue (Vite CSS import), ne kao Vite entry, da se
+   vite.config.js ne dira izvan admin faze. */
+
+.admin-header {
+  background: var(--ink);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.admin-header-inner {
+  width: 1440px;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  height: 72px;
+  padding: 0 28px;
+}
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: none;
+}
+.admin-brand-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--grey);
+  border-left: 1px solid var(--bark);
+  padding-left: 11px;
+  margin-left: 2px;
+}
+.admin-nav {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.admin-nav-link {
+  border: 0;
+  background: transparent;
+  padding: 9px 13px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ivory);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.admin-nav-link.active {
+  font-weight: 600;
+  border-bottom-color: var(--ember);
+}
+.admin-nav-link:hover {
+  border-bottom-color: var(--grey);
+}
+.admin-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+}
+.admin-clock {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sand);
+}
+.admin-operator-chip {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ivory);
+  border: 1px solid var(--bark);
+  padding: 7px 12px;
+}
+
+.admin-container {
+  width: 1440px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+.admin-main {
+  width: 1440px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 44px 28px 80px;
+}
+.admin-h1 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* KPI hairline grid: uppercase label, 32px tabular value, 14px note */
+.kpi-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--sand);
+  border: 1px solid var(--sand);
+  margin-bottom: 32px;
+}
+.kpi-cell {
+  background: var(--white);
+  padding: 22px 20px;
+}
+.kpi-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--bark);
+  margin-bottom: 10px;
+}
+.kpi-value {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.kpi-note {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--bark);
+}
+
+/* Ember-headed panel: ember plane frame, ivory header plate, ivory body. Ember and ink never touch. */
+.ember-panel {
+  border: 1px solid var(--ink);
+}
+.ember-panel-head {
+  background: var(--ember);
+  padding: 8px;
+}
+.ember-panel-head-inner {
+  background: var(--ivory);
+  color: var(--ink);
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.ember-panel-head-inner.lg {
+  font-size: 26px;
+  font-weight: 700;
+}
+.ember-panel-body {
+  background: var(--ivory);
+  padding: 18px 20px;
+}
+
+/* Filter chips sa live brojačima. Aktivan: ink fill, ivory tekst. */
+.filter-chip-row {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  border: 1px solid var(--sand);
+  background: var(--white);
+  color: var(--ink);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.filter-chip:hover {
+  border-color: var(--ink);
+}
+.filter-chip.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ivory);
+  font-weight: 600;
+}
+
+/* Detalj aside: sticky, ink zaglavlje */
+.detail-aside {
+  border: 1px solid var(--ink);
+  position: sticky;
+  top: 90px;
+}
+.detail-aside-head {
+  background: var(--ink);
+  padding: 18px 22px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.detail-aside-head-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ivory);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.detail-aside-body {
+  padding: 22px;
+}
+.detail-dl {
+  margin: 0 0 24px;
+  border-top: 1px solid var(--sand);
+}
+.detail-dl-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  border-bottom: 1px solid var(--sand);
+  padding: 11px 0;
+  gap: 12px;
+}
+.detail-dl-row dt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bark);
+}
+.detail-dl-row dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+}
+.detail-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--bark);
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Redovi liste stanja, majstora akcije: sitni izbor dugmad */
+.choice-btn {
+  border: 1px solid var(--sand);
+  background: var(--white);
+  color: var(--ink);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.choice-btn:hover {
+  border-color: var(--ink);
+}
+.choice-btn.selected {
+  border-color: var(--ink);
+  background: var(--ivory);
+  font-weight: 600;
+}
+.choice-btn.selected .choice-btn-note {
+  color: var(--bark);
+}
+.choice-btn-note {
+  font-size: 13px;
+  color: var(--bark);
+  white-space: nowrap;
+}
+
+/* Cjenovnik uređivanje: izmijenjeni red */
+.price-row-dirty {
+  background: var(--ivory) !important;
+}
+.price-input {
+  width: 96px;
+  border: 1px solid var(--sand);
+  background: var(--white);
+  padding: 9px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.price-input.dirty {
+  border-color: var(--ink);
+}
+.pill-unpublished {
+  border: 1px solid var(--ink);
+  background: var(--ivory);
+  color: var(--ink);
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-sand-disabled {
+  border: 0;
+  background: var(--sand);
+  color: var(--ink);
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+/* Sticky ink-headed forma (dodaj grad, dodaj majstora, itd.) */
+.form-aside {
+  border: 1px solid var(--ink);
+  position: sticky;
+  top: 90px;
+}
+.form-aside-head {
+  background: var(--ink);
+  padding: 18px 22px;
+}
+.form-aside-head h2 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--sand);
+}
+.form-aside-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.row-action-btn {
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.row-action-btn:hover {
+  background: var(--ink);
+  color: var(--ivory);
+}
+.row-action-btn.muted {
+  border-color: var(--sand);
+  color: var(--bark);
+}
+.row-action-btn.muted:hover {
+  border-color: var(--ink);
+  background: transparent;
+  color: var(--ink);
+}
+
+/* Modal jednostavan: overlay + ink-headed kartica */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(37, 36, 34, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  padding: 20px;
+}
+.modal-card {
+  background: var(--white);
+  border: 1px solid var(--ink);
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.modal-card-head {
+  background: var(--ink);
+  color: var(--ivory);
+  padding: 16px 22px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.modal-card-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-state {
+  border: 1px solid var(--sand);
+  background: var(--zebra);
+  padding: 32px 28px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--bark);
+  line-height: 1.55;
+}
