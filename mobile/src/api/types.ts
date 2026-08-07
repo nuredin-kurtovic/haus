@@ -62,7 +62,7 @@
 // Zajednički / pomoćni tipovi
 // ---------------------------------------------------------------------------
 
-export type Role = 'klijent' | 'dispecer';
+export type Role = 'klijent' | 'dispecer' | 'majstor';
 
 export type PaymentMethod = 'uplatnica' | 'kartica';
 
@@ -76,7 +76,17 @@ export type JobStatus = 'novo' | 'zakazano' | 'u_toku' | 'zavrseno';
  */
 export type JobType = 'redovno' | 'garancija' | 'pregled';
 
-export type CityStatus = 'aktivan' | 'u_pripremi' | 'pauziran';
+/**
+ * Ispravljeno (serviser/dispečer faza, avgust 2026): enum CityStatus.php
+ * (čitanjem izvora, web/app/Enums/CityStatus.php) ima SAMO dvije
+ * vrijednosti, "aktivan" i "u_pripremi". Prethodna verzija ovog tipa je
+ * imala i "pauziran", koje ne postoji nigdje na backendu (ni u enumu, ni u
+ * CityController); nije korišteno nigdje u kodu (grep prije izmjene), pa je
+ * uklanjanje sigurno. Gradovi ekran (19) prebacuje grad tačno između ova
+ * dva stanja, isto kao web prototip (design/README.md "Gradovi": "novi
+ * grad ide u pripremi").
+ */
+export type CityStatus = 'aktivan' | 'u_pripremi';
 
 export type SurchargeType = 'percent' | 'per_km' | 'flat';
 
@@ -761,4 +771,380 @@ export interface FakePaymentRequest {
 export interface FakePaymentResponse {
   processed: boolean;
   subscription_status: SubscriptionStatus | null;
+}
+
+// ---------------------------------------------------------------------------
+// Serviser (uloga majstor) i dispečer (uloga dispecer)
+//
+// Svi tipovi ispod su verifikovani DVOSTRUKO (treći krug verifikacije,
+// avgust 2026): čitanjem izvora (TechnicianJobResource, AdminJobResource,
+// CompleteJobRequest, UpdateJobRequest, JobTransitionService, JobNotifier,
+// CityController/CityResource, TechnicianController, DashboardController
+// za /admin/dashboard) I curl-om na php artisan serve --port=8008, kroz
+// pun krug: klijent prijavi nalog > dispečer dodijeli (PATCH) > preview
+// tekst provjeren riječ po riječ sa stvarno poslatim obavještenjem > Damir
+// start > Damir complete sa dvije multipart fotografije > warranty_until i
+// invoice u odgovoru. Sve dole navedeno je viđeno živo, ne pretpostavljeno.
+// ---------------------------------------------------------------------------
+
+/**
+ * Red u GET /technician/jobs (TechnicianJobResource), curl-om potvrđeno.
+ * BEZ cijena: majstor bira pozicije tek pri završetku, cijenu za klijenta
+ * računa server. `client`/`address` su ravni objekti sa samo onim što
+ * majstoru treba (ime klijenta, grad, ulica), ne puni User/Property.
+ */
+export interface TechnicianJobListItem {
+  id: number;
+  number: string;
+  status: JobStatus;
+  type: JobType;
+  is_emergency: boolean;
+  category: string | null;
+  description: string;
+  client: { name: string };
+  address: { city: string | null; street: string | null };
+  scheduled_window_start: string | null;
+  scheduled_window_end: string | null;
+  deadline_at: string;
+}
+
+/**
+ * GET /technician/jobs/{id}, curl-om potvrđeno. `package` je RAVAN STRING
+ * (naziv paketa), ne objekat: TechnicianJobController::show radi
+ * `$subscription?->package?->name`. `entitlements.ide_na_naplatu` je razlog
+ * zbog kojeg ovaj tip postoji: majstor mora znati unaprijed ide li rad na
+ * naplatu (docs/API.md: "true kad su i kredit i izlasci potrošeni").
+ */
+export interface TechnicianJobDetail extends TechnicianJobListItem {
+  preferred_window: string | null;
+  findings: string | null;
+  contact: { name: string | null; note: string | null };
+  package: string | null;
+  entitlements: {
+    remaining_visits: number;
+    remaining_inspections: number;
+    free_interventions: number;
+    ide_na_naplatu: boolean;
+  };
+  photos: JobPhoto[];
+}
+
+/**
+ * GET /technician/price-list (TechnicianPriceListController), curl-om
+ * potvrđeno: RAZLIKUJE SE od PriceItem (public/klijentski cjenovnik):
+ * SAMO id/name/unit/base_price, NEMA `prices`/`my_price` mapu (majstor ne
+ * vidi popuste po paketu, server ih primjenjuje pri zatvaranju naloga).
+ */
+export interface TechnicianPriceItem {
+  id: number;
+  name: string;
+  unit: string;
+  base_price: number;
+}
+
+export interface TechnicianPriceCategory {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  items: TechnicianPriceItem[];
+}
+
+export interface TechnicianPriceListResponse {
+  data: TechnicianPriceCategory[];
+  meta: { price_list_version: number };
+}
+
+/**
+ * POST /technician/jobs/{id}/start, curl-om potvrđeno: `data` je isti
+ * oblik kao TechnicianJobListItem (bez detail polja), plus `message`.
+ * Idempotentno u u_toku (drugi poziv vraća 200 sa drugom porukom, ne 422).
+ */
+export interface TechnicianStartJobResponse {
+  data: TechnicianJobListItem;
+  message: string;
+}
+
+/** Ulazni oblik jedne stavke rada, POST .../complete (CompleteJobRequest::stavke()). */
+export interface CompleteJobItemInput {
+  price_item_id: number;
+  qty: number;
+}
+
+/** Ulazni oblik jednog materijala, POST .../complete (CompleteJobRequest::materijali()). */
+export interface CompleteJobMaterialInput {
+  name: string;
+  purchase_price: number;
+  qty: number;
+}
+
+/**
+ * Odgovor POST /technician/jobs/{id}/complete (i identično POST
+ * /admin/jobs/{id}/complete), curl-om potvrđeno: NIJE puni JobDetail, samo
+ * ova šest polja plus sažeta faktura (bez stavki, samo totali). `invoice`
+ * je `null` samo teorijski (JobCompletionService uvijek pravi fakturu tipa
+ * "rad", i kad je iznos 0, docs/API.md), ostavljeno nullable za sigurnost.
+ */
+export interface CompleteJobResponse {
+  data: {
+    id: number;
+    number: string;
+    status: JobStatus;
+    completed_at: string | null;
+    warranty_until: string | null;
+    visit_source: 'kredit' | 'izlazak' | 'naplata' | null;
+    invoice: {
+      id: number;
+      number: string;
+      status: InvoiceStatus;
+      labor_total: number;
+      material_total: number;
+      total: number;
+    } | null;
+  };
+  message: string;
+}
+
+// ---------------------------------------------------------------------------
+// Dispečer (uloga dispecer): nalozi, dashboard, majstori, gradovi
+// ---------------------------------------------------------------------------
+
+/**
+ * Red u GET /admin/jobs i osnova GET /admin/jobs/{id} (AdminJobResource),
+ * curl-om potvrđeno. `client`/`technician` su objekti sa `id` (za razliku
+ * od TechnicianJobListItem koji samo majstoru treba ime), jer dispečer
+ * navigira dalje (npr. na karton klijenta).
+ */
+export interface AdminJobListItem {
+  id: number;
+  number: string;
+  status: JobStatus;
+  type: JobType;
+  is_emergency: boolean;
+  category: string | null;
+  /** Prvih 60 znakova opisa, server ga skraćuje (AdminJobResource::NASLOV_ZNAKOVA). */
+  title: string;
+  client: { id: number; name: string; email: string };
+  address: { city: string | null; street: string | null };
+  technician: { id: number; name: string } | null;
+  scheduled_window_start: string | null;
+  scheduled_window_end: string | null;
+  deadline_at: string;
+  deadline_missed_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
+/** GET /admin/jobs meta, curl-om potvrđeno: brojači prate `q`, ne `status` filter. */
+export interface AdminJobsListMeta {
+  counts: {
+    novo: number;
+    zakazano: number;
+    u_toku: number;
+    zavrseno: number;
+    ukupno: number;
+  };
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+}
+
+export interface AdminJobsListResponse {
+  data: AdminJobListItem[];
+  meta: AdminJobsListMeta;
+}
+
+/** Jedan red u AdminJobDetail.items[], čitanjem AdminJobController::show potvrđeno. */
+export interface AdminJobItem {
+  id: number;
+  name: string;
+  qty: number;
+  base_price: number;
+  discount_pct: number;
+  line_total: number;
+}
+
+/** Jedan red u AdminJobDetail.materials[], čitanjem AdminJobController::show potvrđeno. */
+export interface AdminJobMaterial {
+  id: number;
+  name: string;
+  purchase_price: number;
+  qty: number;
+  markup_pct: number;
+  discount_pct: number;
+  line_total: number;
+}
+
+/** Red u AdminJobDetail.notifications[] (historija poslatih obavještenja). */
+export interface AdminJobNotification {
+  id: number;
+  channel: 'push' | 'mejl';
+  template_key: string;
+  body: string;
+  sent_at: string | null;
+}
+
+/**
+ * GET /admin/jobs/{id}, čitanjem AdminJobController::show + curl-om
+ * potvrđeno. `subscription.package` i `parent_job` su RAVNI/sažeti, ne puni
+ * objekti: `package` je samo naziv (string), `parent_job` je samo
+ * {id, number}.
+ */
+export interface AdminJobDetail extends AdminJobListItem {
+  description: string;
+  preferred_window: string | null;
+  findings: string | null;
+  warranty_until: string | null;
+  visit_source: 'kredit' | 'izlazak' | 'naplata' | null;
+  parent_job: { id: number; number: string } | null;
+  contact: { name: string | null; note: string | null };
+  subscription: {
+    id: number;
+    status: SubscriptionStatus;
+    package: string | null;
+    ends_at: string | null;
+    free_interventions: number;
+    remaining_visits: number;
+    remaining_inspections: number;
+  } | null;
+  items: AdminJobItem[];
+  materials: AdminJobMaterial[];
+  photos: JobPhoto[];
+  invoice: {
+    id: number;
+    number: string;
+    status: InvoiceStatus;
+    labor_total: number;
+    material_total: number;
+    total: number;
+    paid_at: string | null;
+  } | null;
+  notifications: AdminJobNotification[];
+}
+
+/**
+ * PATCH /admin/jobs/{id} ulaz (UpdateJobRequest), čitanjem izvora + curl-om
+ * potvrđeno. Sva polja opciona: dodjela majstora bez stanja je dozvoljena i
+ * ne šalje obavještenje (docs/API.md).
+ */
+export interface UpdateJobInput {
+  technician_id?: number;
+  scheduled_window_start?: string;
+  scheduled_window_end?: string;
+  status?: JobStatus;
+}
+
+/**
+ * PATCH /admin/jobs/{id} odgovor, curl-om potvrđeno: `notifications_sent`
+ * je niz template_key stringova (npr. ["termin_potvrdjen"]), praznо kad
+ * PATCH nije okinuo obavještenje (npr. samo dodjela majstora bez stanja).
+ */
+export interface UpdateJobResponse {
+  data: AdminJobListItem;
+  notifications_sent: string[];
+  message: string;
+}
+
+/**
+ * GET /admin/jobs/{id}/notification-preview, curl-om potvrđeno riječ po
+ * riječ protiv teksta koji je stvarno poslan istim parametrima (treći krug
+ * verifikacije): "HAUS: Termin potvrđen. subota 08.08.2026, između 10:00 i
+ * 12:00. Majstor: Damir Hodžić. Otkazivanje u aplikaciji." `status: 'novo'`
+ * nema predložak i vraća 422 (nema polje za taj slučaj).
+ */
+export interface NotificationPreviewResponse {
+  data: {
+    template_key: string;
+    body: string;
+  };
+}
+
+/**
+ * GET /admin/dashboard, curl-om potvrđeno. `deadlines_today` i jobs unutar
+ * `schedule_today` su puni AdminJobListItem (isti oblik kao lista naloga),
+ * ne skraćeni sažetak.
+ */
+export interface AdminDashboard {
+  kpi: {
+    novi_danas: number;
+    aktivni_nalozi: number;
+    rokovi_danas: number;
+    /** Prosjek sati od prijave do završetka, zadnjih 30 dana; `null` bez uzorka. */
+    prosjek_zavrsetka_h: number | null;
+    aktivne_pretplate: number;
+  };
+  deadlines_today: AdminJobListItem[];
+  schedule_today: Array<{
+    /** Tačan tekst sa servera, npr. "10:00 do 12:00" (riječ "do", ne en dash). */
+    window: string;
+    starts_at: string | null;
+    ends_at: string | null;
+    jobs: AdminJobListItem[];
+  }>;
+  renewals_soon: Array<{
+    id: number;
+    client: { id: number; name: string; email: string };
+    package: string | null;
+    ends_at: string | null;
+    auto_renew: boolean;
+    dana_do_isteka: number;
+  }>;
+}
+
+/**
+ * Red u GET/POST/PATCH /admin/technicians (TechnicianController::red),
+ * curl-om potvrđeno.
+ */
+export interface AdminTechnician {
+  id: number;
+  name: string;
+  trade: string;
+  active: boolean;
+  email: string | null;
+  has_account: boolean;
+  jobs_count: number;
+  open_jobs_count: number;
+}
+
+/**
+ * GET /admin/cities red, curl-om potvrđeno: CityResource plus
+ * `properties_count` (dodano u CityController::index, ne u resursu samom).
+ */
+export interface AdminCity extends City {
+  properties_count: number;
+}
+
+/** POST /admin/cities ulaz, čitanjem CityController::pravila() potvrđeno. */
+export interface CreateCityInput {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
+/** PATCH /admin/cities/{id} ulaz, sva polja opciona (čitanjem izvora potvrđeno). */
+export interface UpdateCityInput {
+  status?: CityStatus;
+  name?: string;
+  lat?: number;
+  lng?: number;
+}
+
+/**
+ * POST/PATCH /admin/cities odgovor, čitanjem CityController::store/update
+ * potvrđeno: `data` je OBIČAN CityResource (bez `properties_count`), za
+ * razliku od GET /admin/cities liste (AdminCity ispod) koja ga dodaje samo
+ * u index().
+ */
+export interface AdminCityResponse {
+  data: City;
+  message: string;
+}
+
+export interface AdminCitiesListResponse {
+  data: AdminCity[];
+}
+
+export interface AdminTechniciansListResponse {
+  data: AdminTechnician[];
 }

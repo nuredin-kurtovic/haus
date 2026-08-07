@@ -1,9 +1,9 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 
 /**
- * Tipovi ruta za navigaciju. Onboarding, auth, registracioni tok (01-07) i
- * klijentski ekrani (08-15) su implementirani; dispečerski tabovi (16-19)
- * su za sada placeholderi (sljedeća faza).
+ * Tipovi ruta za navigaciju. Onboarding, auth, registracioni tok (01-07),
+ * klijentski ekrani (08-15), serviserski ekrani (majstor: Nalozi, Profil) i
+ * dispečerski ekrani (16-19) su implementirani.
  *
  * PretplataAktivna nema route param za ishod: ekran čita stvarni
  * `subscription.status` iz registrationStore (setResult), umjesto da
@@ -37,6 +37,7 @@ export type RootStackParamList = {
   // Ulazne tačke u tab navigatore
   ClientTabs: undefined;
   DispatcherTabs: undefined;
+  TechnicianTabs: undefined;
 };
 
 /** Ekrani 09 (koraci) i 10 (potvrda), ugniježđeni u tabu Prijavi. */
@@ -74,10 +75,46 @@ export type ClientTabParamList = {
   Profil: undefined;
 };
 
+/** Ekran 17 (lista) i 18 (nalog i dodjela), ugniježđeni u dispečerskom tabu Nalozi. */
+export type DispatcherNaloziStackParamList = {
+  NaloziList: undefined;
+  NalogDodjela: { jobId: number };
+};
+
 export type DispatcherTabParamList = {
   Danas: undefined;
-  Nalozi: undefined;
+  Nalozi: NavigatorScreenParams<DispatcherNaloziStackParamList>;
   Gradovi: undefined;
+};
+
+/**
+ * Serviserski (majstor) tabovi: Nalozi, Profil (task A). "Moji nalozi",
+ * "Detalj naloga" i "Završetak naloga" su ugniježđeni u tabu Nalozi, isti
+ * obrazac kao NaloziStack.tsx na klijentskoj strani, da tab bar ostane
+ * vidljiv i na detalju.
+ */
+export type TechnicianNaloziStackParamList = {
+  MojiNalozi: undefined;
+  NalogDetalj: { jobId: number };
+  ZavrsetakNaloga: { jobId: number };
+  ZavrsetakPotvrda: {
+    jobId: number;
+    number: string;
+    warrantyUntil: string | null;
+    invoice: {
+      id: number;
+      number: string;
+      status: string;
+      labor_total: number;
+      material_total: number;
+      total: number;
+    } | null;
+  };
+};
+
+export type TechnicianTabParamList = {
+  Nalozi: NavigatorScreenParams<TechnicianNaloziStackParamList>;
+  Profil: undefined;
 };
 
 declare global {

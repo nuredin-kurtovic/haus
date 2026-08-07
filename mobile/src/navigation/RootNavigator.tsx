@@ -4,6 +4,8 @@
  *   bara, kako design/README.md nalaže).
  * - klijent -> ClientTabs.
  * - dispecer -> DispatcherTabs.
+ * - majstor -> TechnicianTabs (serviser, docs/API.md "Serviser (uloga
+ *   majstor)"; login vraća `role` u odgovoru, auth store ga već nosi).
  */
 
 import React, { useEffect } from 'react';
@@ -23,6 +25,7 @@ import KarticaInfoScreen from '../screens/registracija/KarticaInfoScreen';
 import PretplataAktivnaScreen from '../screens/registracija/PretplataAktivnaScreen';
 import ClientTabs from './ClientTabs';
 import DispatcherTabs from './DispatcherTabs';
+import TechnicianTabs from './TechnicianTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -59,6 +62,8 @@ export function RootNavigator() {
         </Stack.Group>
       ) : role === 'dispecer' ? (
         <Stack.Screen name="DispatcherTabs" component={DispatcherTabs} />
+      ) : role === 'majstor' ? (
+        <Stack.Screen name="TechnicianTabs" component={TechnicianTabs} />
       ) : (
         <Stack.Screen name="ClientTabs" component={ClientTabs} />
       )}
