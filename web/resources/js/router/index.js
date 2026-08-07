@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
+import klijentRoutes from './klijent';
+import adminRoutes from './admin';
 
 // Četiri površine: javno, registracija, klijent, admin (dispečer).
-// Javne stranice nose PublicLayout unutar svoje komponente. Prijava,
-// registracija i klijent/admin placeholderi su bez javnog layouta.
+// Klijent i admin rute žive u svojim modulima (klijent.js, admin.js);
+// ovaj fajl se ne dira pri dodavanju ekrana tim površinama.
 const routes = [
   { path: '/', name: 'naslovna', component: () => import('../pages/public/Naslovna.vue') },
   { path: '/proizvod', name: 'proizvod', component: () => import('../pages/public/Proizvod.vue') },
@@ -17,8 +20,8 @@ const routes = [
   { path: '/registracija', name: 'registracija', component: () => import('../pages/auth/Registracija.vue') },
   { path: '/placanje/simulacija', name: 'placanje-simulacija', component: () => import('../pages/placanje/Simulacija.vue') },
 
-  { path: '/klijent', name: 'klijent-pocetna', component: () => import('../pages/klijent/Pocetna.vue') },
-  { path: '/admin', name: 'admin-pocetna', component: () => import('../pages/admin/Pocetna.vue') },
+  ...klijentRoutes,
+  ...adminRoutes,
 ];
 
 const router = createRouter({
@@ -29,6 +32,17 @@ const router = createRouter({
     if (to.hash) return { el: to.hash, top: 150 };
     return { top: 0 };
   },
+});
+
+// Guard po ulozi: rute sa meta.role traže prijavu i tačnu ulogu.
+router.beforeEach((to) => {
+  if (!to.meta.role) return true;
+  const auth = useAuthStore();
+  if (!auth.token) return { name: 'prijava', query: { nazad: to.fullPath } };
+  if (auth.role && auth.role !== to.meta.role) {
+    return auth.role === 'dispecer' ? { name: 'admin-pocetna' } : { name: 'klijent-pocetna' };
+  }
+  return true;
 });
 
 export default router;
