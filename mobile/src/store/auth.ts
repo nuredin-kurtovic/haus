@@ -9,7 +9,14 @@
 
 import { create } from 'zustand';
 import { clearToken, get, getToken, post, setToken } from '../api/client';
-import type { LoginResponse, MeResponse, Role, User } from '../api/types';
+import type {
+  LoginResponse,
+  MeResponse,
+  RegisterRequest,
+  RegisterResponse,
+  Role,
+  User,
+} from '../api/types';
 
 interface AuthState {
   user: User | null;
@@ -19,6 +26,15 @@ interface AuthState {
   isHydrating: boolean;
   hydrate: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  /**
+   * Samo POST /auth/register (docs/API.md). NE upisuje token/user u store i
+   * NE dira keychain: registracioni tok mora proći kroz ekrane 06 (Plaćanje)
+   * i 07 (Pretplata aktivna) pošto RootNavigator prebacuje stack čim token
+   * postoji. Ekran 07 zove commitSession() na "Uđite u aplikaciju".
+   */
+  register: (payload: RegisterRequest) => Promise<RegisterResponse>;
+  /** Upisuje sesiju (keychain + store) nakon što korisnik potvrdi ulazak. */
+  commitSession: (user: User, role: Role, token: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -62,6 +78,17 @@ export const useAuthStore = create<AuthState>((set) => ({
       token: response.token,
       isHydrating: false,
     });
+  },
+
+  register: async (payload: RegisterRequest) => {
+    return post<RegisterResponse>('/auth/register', payload, {
+      skipAuth: true,
+    });
+  },
+
+  commitSession: async (user: User, role: Role, token: string) => {
+    await setToken(token);
+    set({ user, role, token, isHydrating: false });
   },
 
   logout: async () => {

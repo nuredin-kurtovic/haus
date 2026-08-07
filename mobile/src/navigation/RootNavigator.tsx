@@ -19,6 +19,7 @@ import PrijavaScreen from '../screens/auth/PrijavaScreen';
 import IzborPaketaScreen from '../screens/registracija/IzborPaketaScreen';
 import PodaciAdresaScreen from '../screens/registracija/PodaciAdresaScreen';
 import PlacanjeScreen from '../screens/registracija/PlacanjeScreen';
+import KarticaInfoScreen from '../screens/registracija/KarticaInfoScreen';
 import PretplataAktivnaScreen from '../screens/registracija/PretplataAktivnaScreen';
 import ClientTabs from './ClientTabs';
 import DispatcherTabs from './DispatcherTabs';
@@ -50,6 +51,7 @@ export function RootNavigator() {
           <Stack.Screen name="IzborPaketa" component={IzborPaketaScreen} />
           <Stack.Screen name="PodaciAdresa" component={PodaciAdresaScreen} />
           <Stack.Screen name="Placanje" component={PlacanjeScreen} />
+          <Stack.Screen name="KarticaInfo" component={KarticaInfoScreen} />
           <Stack.Screen
             name="PretplataAktivna"
             component={PretplataAktivnaScreen}

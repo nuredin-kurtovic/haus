@@ -1,9 +1,15 @@
 /**
  * TypeScript tipovi za HAUS REST API entitete.
  *
- * Izvor: docs/API.md (ugovor između weba i mobile). Backend je jedini
- * izvor istine; ovi tipovi prate ugovor onako kako je opisan u API.md i
- * design/README.md. Ako se ugovor promijeni, ažurirati ovaj fajl.
+ * Izvor: docs/API.md (ugovor između weba i mobile) PLUS živa provjera
+ * protiv `php artisan serve` (lead review, avgust 2026): docs/API.md ne
+ * navodi tačna imena polja, a stvarni JSON iz Laravel resursa se
+ * razlikovao od prve verzije ovog fajla (npr. Package nema `price`/
+ * `features`, ima `price_year`/`visits_per_year`/...; VolumeDiscountTier
+ * koristi `min/max/pct`, ne `min_properties/max_properties/discount_percent`).
+ * Polja obilježena "nepotvrđeno" nisu viđena u živom odgovoru, ostavljena
+ * su kao best-effort pretpostavka. Backend je jedini izvor istine; ako se
+ * ugovor promijeni, ažurirati ovaj fajl i ponovo provjeriti curl-om.
  */
 
 // ---------------------------------------------------------------------------
@@ -24,12 +30,26 @@ export type CityStatus = 'aktivan' | 'u_pripremi' | 'pauziran';
 
 export type SurchargeType = 'percent' | 'per_km' | 'flat';
 
-export type PropertyUse =
-  | 'izdaje_se'
-  | 'prazan_dijaspora'
-  | 'zivim_u_njemu';
+/**
+ * Nepotvrđeno: jedini uzorak koji smo vidjeli je "zivim" (default kad se
+ * `use` ne šalje na registraciji). Web prototip ima tri opcije (Izdaje se
+ * / Prazan, dijaspora / Živim u njemu) ali njihove stvarne enum vrijednosti
+ * nisu curl-om potvrđene, pa je tip ovdje otvoren (string) da ne tvrdi
+ * pogrešan ugovor.
+ */
+export type PropertyUse = string;
 
-export type PackageSlug = 'mini' | 'plus' | 'pro';
+/** Puni slug sa "haus-" prefiksom, potvrđeno curl-om na GET /packages. */
+export type PackageSlug = 'haus-mini' | 'haus-plus' | 'haus-pro';
+
+/**
+ * Status pretplate. "cekanje_uplate" i "ponuda" potvrđeni curl-om (POST
+ * /auth/register). "aktivna" nije živo viđen (Monri webhook još ne
+ * postoji, čak i "kartica" plaćanje vraća "cekanje_uplate" dok se
+ * simulirano plaćanje ne završi), ali je nužan za kasnije stanje kad
+ * uplata legne ili webhook stigne.
+ */
+export type SubscriptionStatus = 'cekanje_uplate' | 'aktivna' | 'ponuda';
 
 export interface ApiListMeta {
   current_page: number;
@@ -52,6 +72,15 @@ export interface ApiListResponse<T> {
   meta: ApiListMeta;
 }
 
+/**
+ * Sve javne liste (packages, cities, price-list, surcharges) i
+ * settings/public su omotane u `{data: ...}` BEZ links/meta (potvrđeno
+ * curl-om), za razliku od paginiranih admin listi (ApiListResponse gore).
+ */
+export interface ApiDataEnvelope<T> {
+  data: T;
+}
+
 /** 422 odgovor sa greškama po polju, poruke na bosanskom. */
 export interface ApiValidationError {
   message: string;
@@ -65,6 +94,7 @@ export interface ApiValidationError {
 export interface City {
   id: number;
   name: string;
+  slug: string;
   lat: number;
   lng: number;
   status: CityStatus;
@@ -74,32 +104,46 @@ export interface City {
 // Paketi
 // ---------------------------------------------------------------------------
 
+/** Ključevi potvrđeni curl-om: min/max/pct, NE min_properties/discount_percent. */
 export interface VolumeDiscountTier {
-  min_properties: number;
-  max_properties: number | null;
-  discount_percent: number;
+  min: number;
+  max: number | null;
+  pct: number;
 }
 
+/**
+ * GET /packages shape, curl-om potvrđeno (avgust 2026). Nema `price`,
+ * `unit`, `audience`, `features`, `remaining_*`: to je bila pogrešna
+ * pretpostavka prve verzije ovog fajla. Cijena, popusti i rokovi su
+ * numerički parametri paketa; klijent ih spaja u prikaz kartice
+ * (screens/registracija/IzborPaketaScreen.tsx), ne čita gotovu rečenicu.
+ */
 export interface Package {
   id: number;
-  slug: PackageSlug;
   name: string;
-  /** Cijena u KM. Za Pro je "po stanu". */
-  price: number;
-  unit: string;
-  audience: string;
-  features: string[];
-  remaining_visits: number;
-  free_interventions: number;
-  remaining_inspections: number;
-  /** Samo za HAUS Pro. */
-  volume_discount_tiers?: VolumeDiscountTier[];
+  slug: PackageSlug;
+  /** Cijena u KM. Za Pro je "po stanu godišnje". */
+  price_year: number;
+  visits_per_year: number;
+  deadline_hours: number;
+  emergency_deadline_hours: number;
+  emergency_included: boolean;
+  labor_discount_pct: number;
+  material_discount_pct: number;
+  inspections_per_year: number;
+  warranty_months: number;
+  /** Pro je "po stanu"; ovo je pouzdaniji test od provjere slug-a. */
+  is_per_apartment: boolean;
+  sort: number;
+  /** Prisutno na svim paketima, prazan niz za Mini/Plus. */
+  volume_discount_tiers: VolumeDiscountTier[];
 }
 
 // ---------------------------------------------------------------------------
 // Cjenovnik
 // ---------------------------------------------------------------------------
 
+/** Ključevi su slug bez "haus-" prefiksa (docs/API.md "Konvencije"). */
 export interface PriceItemPrices {
   mini: number;
   plus: number;
@@ -109,6 +153,7 @@ export interface PriceItemPrices {
 export interface PriceItem {
   id: number;
   name: string;
+  unit: string;
   /** Osnovna cijena bez pretplate. */
   base_price: number;
   /** Izračunate cijene po paketu, uvijek sa servera. */
@@ -120,6 +165,8 @@ export interface PriceItem {
 export interface PriceCategory {
   id: number;
   name: string;
+  slug: string;
+  icon: string;
   items: PriceItem[];
 }
 
@@ -130,35 +177,74 @@ export interface Surcharge {
   value: number;
 }
 
+/** GET /settings/public shape, curl-om potvrđeno. */
 export interface PublicSettings {
-  opening_hours: string;
-  hourly_rate: number;
-  price_list_version: string;
+  radno_vrijeme: {
+    pon_pet: { od: string; do: string };
+    subota: { od: string; do: string };
+    nedjelja: { samo_hitno: boolean };
+    napomena: string;
+  };
+  satnica_redovna: number;
+  satnica_hitna: number;
+  izlazak_bez_pretplate: number;
+  ukljuceno_minuta: number;
+  materijal_marza_pct: number;
+  price_list_version: number;
 }
 
 // ---------------------------------------------------------------------------
 // Korisnik, pretplata
 // ---------------------------------------------------------------------------
 
+/**
+ * Curl-om potvrđeno na /auth/login, /me i /auth/register: User NEMA
+ * `role` (role putuje odvojeno, vidi LoginResponse/MeResponse), notif
+ * flagovi su ravni (notif_push/notif_email/notif_marketing), ne
+ * ugniježđeni `notifications: {...}` kako je prva verzija pretpostavila.
+ */
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: Role;
+  notif_push: boolean;
+  notif_email: boolean;
+  notif_marketing: boolean;
+  /** Nepotvrđeno u uzorku (nije bilo u odgovoru); ostavljeno opciono. */
   phone?: string | null;
-  notifications?: {
-    push: boolean;
-    email: boolean;
-    marketing: boolean;
-  };
 }
 
-export interface SubscriptionProperty {
+/** Slim oblik paketa ugniježđen u Subscription (id/name/slug/is_per_apartment
+ * samo), NE puni Package sa cijenama/rokovima. Curl-om potvrđeno. */
+export interface SubscriptionPackageSummary {
+  id: number;
+  name: string;
+  slug: PackageSlug;
+  is_per_apartment: boolean;
+}
+
+/** subscription.properties[] iz POST /auth/register, curl-om potvrđeno. */
+export interface SubscriptionPropertyResult {
   id: number;
   city_id: number;
+  city: { id: number; name: string };
   street: string;
-  use?: PropertyUse;
-  contact?: string | null;
+  use: PropertyUse;
+  contact_name: string | null;
+  contact_note: string | null;
+  remaining_visits: number;
+  remaining_inspections: number;
+}
+
+export interface SubscriptionInvoice {
+  id: number;
+  number: string;
+  /** Viđeno: "pretplata". Vjerovatno i "posao"/"garancija" za nalog fakture. */
+  type: string;
+  /** Viđeno: "nenaplaceno". Nepotvrđeno kako izgleda plaćeni status. */
+  status: string;
+  total: number;
+  paid_at: string | null;
 }
 
 export interface SubscriptionPaymentHistoryEntry {
@@ -169,15 +255,27 @@ export interface SubscriptionPaymentHistoryEntry {
   status: 'placeno' | 'neplaceno';
 }
 
+/**
+ * Curl-om potvrđeno na POST /auth/register. `free_interventions` je
+ * runtime kredit (kreće od 0, sistem ga automatski dodaje kad rok
+ * padne, design/README.md "Job lifecycle"), NIJE statični parametar
+ * paketa: prva verzija ovog fajla je to pogrešno stavila na Package.
+ */
 export interface Subscription {
   id: number;
-  package: Package;
-  ends_at: string;
-  remaining_visits: number;
-  free_interventions: number;
-  remaining_inspections: number;
+  status: SubscriptionStatus;
+  package: SubscriptionPackageSummary;
+  starts_at: string | null;
+  ends_at: string | null;
   auto_renew: boolean;
-  properties?: SubscriptionProperty[];
+  /** Ukupna godišnja cijena pretplate, server-side izračunata (uklj. Pro popust). */
+  price: number;
+  price_paid: number | null;
+  free_interventions: number;
+  remaining_visits: number;
+  remaining_inspections: number;
+  properties: SubscriptionPropertyResult[];
+  /** Nepotvrđeno curl-om (GET /client/subscription nije testiran u ovoj fazi). */
   payment_history?: SubscriptionPaymentHistoryEntry[];
 }
 
@@ -251,14 +349,16 @@ export interface ActiveJobSummary {
 // Dashboard
 // ---------------------------------------------------------------------------
 
+/**
+ * Nepotvrđeno curl-om (klijent tab ekrani su van scope-a ove faze).
+ * Oblik pretplate ovdje je sveden na isti Subscription tip radi
+ * dosljednosti (package je slim summary, ne puni Package sa cijenama).
+ */
 export interface ClientDashboard {
-  subscription: {
-    package: Package;
-    ends_at: string;
-    remaining_visits: number;
-    free_interventions: number;
-    remaining_inspections: number;
-  };
+  subscription: Pick<
+    Subscription,
+    'package' | 'ends_at' | 'remaining_visits' | 'free_interventions' | 'remaining_inspections'
+  >;
   active_job: ActiveJobSummary | null;
   recent_jobs: JobListItem[];
 }
@@ -282,7 +382,13 @@ export interface RegisterPropertyInput {
   city_id: number;
   street: string;
   use?: PropertyUse;
-  contact?: string;
+  /**
+   * Nepotvrđeno kao INPUT (samo output oblik `contact_name`/
+   * `contact_note` je curl-om viđen na subscription.properties[]; mobile
+   * ekrani ne šalju ova polja u ovoj fazi, drži se optional/best-effort).
+   */
+  contact_name?: string;
+  contact_note?: string;
 }
 
 export interface RegisterRequest {
@@ -294,14 +400,20 @@ export interface RegisterRequest {
   properties: RegisterPropertyInput[];
 }
 
+/**
+ * Curl-om potvrđeno (POST /auth/register, 201). `status` je uvijek
+ * prisutan (ogleda subscription.status), ne samo za "ponuda" kako je
+ * prva verzija ovog fajla pretpostavila. `invoice` nedostaje samo za
+ * "ponuda" (Pro 10+, nema fakture prije nego dispečer napravi ponudu).
+ */
 export interface RegisterResponse {
+  status: SubscriptionStatus;
   user: User;
   subscription: Subscription;
   token: string;
-  /** Prisutno samo za payment_method: kartica. */
+  /** Prisutno kad je payment_method kartica (Monri redirect, fake za sada). */
   payment?: { redirect_url: string };
-  /** Prisutno kad Pro registracija ima 10+ stanova. */
-  status?: 'ponuda';
+  invoice?: SubscriptionInvoice;
 }
 
 export interface LoginRequest {
@@ -315,13 +427,18 @@ export interface LoginResponse {
   role: Role;
 }
 
+/**
+ * Curl-om potvrđeno na GET /me: `subscription` je `null` (ne izostavljeno
+ * polje) kad korisnik nema aktivnu pretplatu, npr. dok "cekanje_uplate"
+ * traje. Prva verzija je koristila `subscription?:`, što ne hvata `null`.
+ */
 export interface MeResponse {
   user: User;
   role: Role;
-  subscription?: Pick<
+  subscription: Pick<
     Subscription,
     'package' | 'ends_at' | 'remaining_visits'
-  >;
+  > | null;
 }
 
 // ---------------------------------------------------------------------------
