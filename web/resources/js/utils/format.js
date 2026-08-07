@@ -23,6 +23,7 @@ export const sati = (n) => pluralWord(n, ['sat', 'sata', 'sati']);
 export const mjeseci = (n) => pluralWord(n, ['mjesec', 'mjeseca', 'mjeseci']);
 export const grada = (n) => pluralWord(n, ['grad', 'grada', 'gradova']);
 export const intervencije = (n) => pluralWord(n, ['uključena intervencija', 'uključene intervencije', 'uključenih intervencija']);
+export const stanova = (n) => pluralWord(n, ['stan', 'stana', 'stanova']);
 
 /**
  * Naziva niz gradova kao rečenicu: "Sarajevo", "Sarajevo i Travnik", "Sarajevo, Travnik i Zenica".
@@ -65,6 +66,50 @@ export function paketOpis(pkg) {
 
 export function paketJedinica(pkg) {
   return pkg.is_per_apartment ? 'god po stanu' : 'god';
+}
+
+/**
+ * Puna riječ za jedinicu cijene, za registracioni tok (tile i sažetak).
+ */
+export function paketJedinicaGodisnje(pkg) {
+  return pkg.is_per_apartment ? 'po stanu godišnje' : 'godišnje';
+}
+
+/**
+ * Jedan hairline red sažetka na tile-u paketa u registraciji, izveden iz
+ * brojčanih atributa sa /packages, bez izmišljenih podataka.
+ */
+export function paketKratko(pkg) {
+  const rok = `Rok ${sati(pkg.deadline_hours)}`;
+  if (pkg.is_per_apartment) {
+    return `${intervencije(pkg.visits_per_year)}. ${rok}. Po stanu.`;
+  }
+  return `${intervencije(pkg.visits_per_year)}. ${rok}. Popust ${pkg.labor_discount_pct}%.`;
+}
+
+/**
+ * Popust na količinu za HAUS Pro iz volume_discount_tiers sa /packages.
+ * Isti algoritam kao PriceCalculator::volumeDiscountPct na serveru.
+ */
+export function popustNaKolicinu(apartments, tiers) {
+  for (const tier of tiers || []) {
+    const min = Number(tier.min ?? 0);
+    const max = tier.max === null || tier.max === undefined ? null : Number(tier.max);
+    if (apartments >= min && (max === null || apartments <= max)) {
+      return Number(tier.pct ?? 0);
+    }
+  }
+  return 0;
+}
+
+/**
+ * Godišnja cijena HAUS Pro pretplate, ista formula kao PriceCalculator::subscriptionTotal.
+ * Samo za orijentacioni prikaz prije uplate; serverski total iz responsa je izvor istine.
+ */
+export function proTotal(priceYear, apartments, tiers) {
+  const gross = priceYear * apartments;
+  const pct = popustNaKolicinu(apartments, tiers);
+  return Math.round(gross * (1 - pct / 100));
 }
 
 /**

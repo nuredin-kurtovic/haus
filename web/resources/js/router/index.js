@@ -15,6 +15,7 @@ const routes = [
 
   { path: '/prijava', name: 'prijava', component: () => import('../pages/auth/Prijava.vue') },
   { path: '/registracija', name: 'registracija', component: () => import('../pages/auth/Registracija.vue') },
+  { path: '/placanje/simulacija', name: 'placanje-simulacija', component: () => import('../pages/placanje/Simulacija.vue') },
 
   { path: '/klijent', name: 'klijent-pocetna', component: () => import('../pages/klijent/Pocetna.vue') },
   { path: '/admin', name: 'admin-pocetna', component: () => import('../pages/admin/Pocetna.vue') },
