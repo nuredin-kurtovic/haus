@@ -1,3 +1,29 @@
+# HAUS Mobile
+
+React Native 0.86, CLI setup (ne Expo), TypeScript. Klijent, serviser i dispecer na istom Laravel API-ju (vidi ../docs/API.md).
+
+## Pokretanje
+
+```sh
+export PATH="$HOME/.nvm/versions/node/v24.12.0/bin:$PATH"  # node je iz nvm-a
+npm install
+
+# iOS
+cd ios && bundle install && bundle exec pod install && cd ..
+npm run ios
+
+# Android (treba Android SDK + emulator ili uredjaj)
+npm run android
+```
+
+Backend mora raditi lokalno: `cd ../web && php artisan serve` (API base je localhost:8000 na iOS simulatoru, 10.0.2.2:8000 na Android emulatoru, vidi src/api/client.ts).
+
+Test logini (lozinka haus1234): klijent@haus.ba, damir@haus.ba (serviser), dispecer@haus.ba.
+
+Provjere: `npx tsc --noEmit`. Push (FCM/notifee) jos nije zicen, treba Firebase projekat; TODO u src/api/client.ts.
+
+---
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
