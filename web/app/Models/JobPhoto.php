@@ -12,6 +12,9 @@ class JobPhoto extends Model
 {
     use HasFactory;
 
+    /** Fotografije naloga uvijek idu na public disk. */
+    public const DISK = 'public';
+
     protected $fillable = ['job_id', 'type', 'path'];
 
     protected function casts(): array
@@ -24,8 +27,12 @@ class JobPhoto extends Model
         return $this->belongsTo(Job::class);
     }
 
+    /**
+     * Fotografije naloga stoje na public disku, pa i URL mora ici sa njega.
+     * Podrazumijevani disk je local i dao bi putanju koja nista ne servira.
+     */
     public function url(): string
     {
-        return Storage::url($this->path);
+        return Storage::disk(self::DISK)->url($this->path);
     }
 }

@@ -33,15 +33,83 @@ Bez tokena: 401 `{message: "Niste prijavljeni."}`. Pogrešna uloga: 403 `{messag
 
 ## Klijent (uloga: klijent)
 
-| GET | `/client/dashboard` | `{subscription: {package, ends_at, remaining_visits, free_interventions, remaining_inspections}, active_job: {id, number, status, steps}, recent_jobs: []}` |
-| POST | `/client/jobs` | `{price_category_id, description, is_emergency, preferred_window, subscription_property_id?}` + opciono multipart `photo`. Odgovor: `{job: {id, number, deadline_at}}`. Odbija ako pretplata nije aktivna. |
-| GET | `/client/jobs` | Lista: `{id, number, status, type, category, title, technician_name, scheduled_window, warranty_until}` |
-| GET | `/client/jobs/{id}` | Detalj + `findings`, `photos: [{type, url}]`, `invoice: {labor_items[], materials[], labor_total, material_total, total}` |
-| GET | `/client/subscription` | Paket, prava, iskorišteno, historija plaćanja, `auto_renew`. |
-| POST | `/client/subscription/cancel` | Jedan klik, gasi auto_renew. |
+| GET | `/client/dashboard` | `{subscription, active_job, recent_jobs}`, detalji ispod. |
+| POST | `/client/jobs` | multipart `{price_category_id, description, is_emergency, preferred_window?, subscription_property_id?, photo?}`. 201 `{job: {id, number, deadline_at}}`. |
+| GET | `/client/jobs` | `{data: []}`, najnoviji prvi. |
+| GET | `/client/jobs/{id}` | `{data}` sa `findings`, `steps`, `photos`, `invoice`. Tuđi nalog: 404. |
+| GET | `/client/subscription` | Paket, prava po adresi, historija faktura, `auto_renew`. |
+| POST | `/client/subscription/cancel` | Jedan klik, gasi `auto_renew`. Idempotentno. |
 | GET | `/client/price-list` | Kao public, plus `my_price` po poziciji. |
-| GET/PUT | `/client/profile` | Kontakt polja + `notifications: {push, email, marketing}`. Adresa se NE mijenja ovdje. |
+| GET/PUT | `/client/profile` | `{name, email, notifications: {push, email, marketing}}`. Mejl je read-only, adresa se NE mijenja ovdje. |
 | POST | `/client/address-change-request` | `{message}` > zahtjev dispečeru. |
+
+### Detalji klijentskih odgovora
+
+**`GET /client/dashboard`**
+
+```
+{
+  subscription: {id, package: {name, slug}, status, ends_at, remaining_visits,
+                 free_interventions, remaining_inspections} | null,
+  active_job: {id, number, status, category, deadline_at, scheduled_window_start,
+               scheduled_window_end, technician: {name}|null,
+               steps: [{key, label, done}]} | null,
+  recent_jobs: [{id, number, status, type, category, created_at}]   // zadnjih 5
+}
+```
+
+- `subscription` je aktivna pretplata, a ako je nema, zadnja upisana. Tako klijent koji čeka uplatu i dalje vidi svoje stanje. `remaining_visits` i `remaining_inspections` su zbir preko svih adresa.
+- `active_job` je najnoviji nalog koji nije `zavrseno`, inače `null`.
+- `steps` su uvijek ista četiri koraca istim redom: `prijava_primljena` (uvijek `done`), `majstor_dodijeljen` (`technician_id` postavljen), `termin_potvrdjen` (`scheduled_window_start` postavljen), `majstor_krenuo` (status `u_toku`). `label` je bosanski tekst sa servera, klijenti ga ne prevode.
+
+**`POST /client/jobs`**
+
+- Traži pretplatu u stanju `aktivna`. Inače 403 `{message, subscription_status}`, poruka po stanju: `cekanje_uplate` > "Vaša pretplata još nije aktivna. Prijava kvara je moguća čim uplata legne."
+- `description` min 10 znakova. `photo` je slika do 8 MB, upisuje se kao `job_photos.type = prije` jer je kontekst kvara.
+- `subscription_property_id` je obavezan kad pretplata ima više adresa (Pro), inače se uzima jedina adresa. Tuđa adresa: 422.
+- `deadline_at` se računa iz paketa (`deadline_hours`, odnosno `emergency_deadline_hours` kad je `is_emergency`) i nikad se ne mijenja.
+- Nalog se prima i kad je `remaining_visits` nula. Šta se naplaćuje odlučuje se pri završetku, ne pri prijavi.
+- Prijava šalje obavještenje `prijava_primljena` sa `{broj}` i `{rok}`.
+
+**`GET /client/jobs`** > `{data: [red]}`, red:
+
+```
+{id, number, status, type, category, title, description, is_emergency,
+ technician: {name}|null, scheduled_window_start, scheduled_window_end,
+ warranty_until, created_at, deadline_at, deadline_missed_at}
+```
+
+`title` je prvih 60 znakova opisa, `category` je naziv kategorije cjenovnika.
+
+**`GET /client/jobs/{id}`** > `{data}`: sva polja reda iz liste, plus
+
+```
+{preferred_window, completed_at, findings, steps: [{key, label, done}],
+ property: {id, city, street} | null,
+ photos: [{type: prije|poslije, url}],
+ invoice: {id, number, status, labor_items: [{name, qty, line_total}],
+           materials: [{name, qty, line_total}], labor_total, material_total,
+           total, paid_at} | null}
+```
+
+**`GET /client/subscription`**
+
+```
+{package: {puni paket kao na /packages}, status, starts_at, ends_at, auto_renew,
+ price_paid, free_interventions,
+ properties: [{id, city, street, use, remaining_visits, remaining_inspections}],
+ payments: [{number, type, total, status, paid_at, created_at}]}
+```
+
+`payments` je historija faktura korisnika, najnovija prva. Bez ijedne pretplate: 404.
+
+**`POST /client/subscription/cancel`** > `{message, auto_renew: false, ends_at}`. Pretplata ostaje `aktivna` do isteka, gasi se samo obnova. Ponovljen poziv vraća isti odgovor.
+
+**`GET /client/price-list`** > isti oblik kao javni, uz `my_price` (cijeli KM) na svakoj poziciji i `meta.my_package: {name, slug, labor_discount_pct, material_discount_pct}`. Klijent bez pretplate dobija osnovnu cijenu kao svoju.
+
+**`GET/PUT /client/profile`** > `{data: {name, email, notifications: {push, email, marketing}}}`. PUT prima `{name, notifications}`; `email` se ignoriše. Prekidači se mapiraju na `users.notif_push`, `notif_email`, `notif_marketing`.
+
+**`POST /client/address-change-request`** `{message min 10, subscription_property_id?}` > 201 `{message}`. Upisuje `home_records` red tipa `napomena` sa naslovom "Zahtjev za promjenu adrese" na klijentovu adresu i šalje mejl dispečeru (`settings.dispecer_email`, fallback `config services.haus.dispatcher_email`). Bez izbora ide prva adresa pretplate.
 
 ## Dispečer (uloga: dispecer)
 
@@ -62,6 +130,15 @@ Bez tokena: 401 `{message: "Niste prijavljeni."}`. Pogrešna uloga: 403 `{messag
 | CRUD | `/admin/cities` | POST validira BiH bounding box (lat 42–46, lon 15–20), novi grad je `u_pripremi`. PATCH `{status}`. DELETE samo bez pretplata. |
 | GET/PUT | `/admin/settings` | Radno vrijeme, satnice, doplate, tiers, predlošci obavještenja. |
 | CRUD | `/admin/technicians` | Ime, zanat, aktivan. |
+
+## Dev (samo lokalno)
+
+| POST | `/dev/fake-payment` | `{reference, outcome: approved\|declined}` > `{processed, subscription_status}` |
+
+- Postoji samo kad je `services.haus.payment_gateway = fake` I `app.debug = true`. Inače 404, u produkciji je rute kao da nema.
+- Bez auth-a i bez potpisa: stranica `/placanje/simulacija` je gađa odmah nakon 3DS redirecta, dok korisnik još nema aktivnu pretplatu.
+- Sklapa isti payload koji šalje gateway (`approved` dodaje `masked_pan` "403940xxxxxx1881" i `token` "FAKE-TOKEN-{uuid}") i pušta ga kroz `PaymentProcessor`, isti kod put kao pravi webhook. Znači: aktivacija pretplate, knjiženje fakture, račun na mejl, obavještenje `pretplata_aktivna`, token za MIT obnovu.
+- `processed` je `false` kad je ista uplata već proknjižena. Nepoznata referenca: 404.
 
 ## Konvencije
 

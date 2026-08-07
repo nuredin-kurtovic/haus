@@ -65,6 +65,16 @@ class User extends Authenticatable
             ->latestOfMany();
     }
 
+    /**
+     * Pretplata koju klijentski ekrani prikazuju: aktivna ako postoji, inace
+     * zadnja upisana. Klijent koji ceka uplatu tako i dalje vidi svoje stanje.
+     */
+    public function currentSubscription(): ?Subscription
+    {
+        return $this->activeSubscription()->first()
+            ?? $this->subscriptions()->latest('id')->first();
+    }
+
     public function jobs(): HasMany
     {
         return $this->hasMany(Job::class);

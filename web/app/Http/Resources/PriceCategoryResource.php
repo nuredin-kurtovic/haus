@@ -15,8 +15,9 @@ class PriceCategoryResource extends JsonResource
 {
     /**
      * @param  Collection<int, Package>  $packages
+     * @param  Package|null  $myPackage  paket prijavljenog klijenta, dodaje my_price
      */
-    public function __construct($resource, private Collection $packages)
+    public function __construct($resource, private Collection $packages, private ?Package $myPackage = null)
     {
         parent::__construct($resource);
     }
@@ -32,7 +33,7 @@ class PriceCategoryResource extends JsonResource
             'slug' => $this->slug,
             'icon' => $this->icon,
             'items' => $this->items->map(
-                fn ($item) => new PriceItemResource($item, $this->packages)
+                fn ($item) => new PriceItemResource($item, $this->packages, $this->myPackage)
             )->values(),
         ];
     }

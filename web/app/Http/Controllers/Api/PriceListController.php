@@ -19,6 +19,23 @@ class PriceListController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        return $this->cjenovnik($request, null);
+    }
+
+    /**
+     * Isti cjenovnik, plus my_price po paketu prijavljenog klijenta.
+     *
+     * Klijent bez pretplate vidi osnovnu cijenu kao svoju, jer popusta nema.
+     */
+    public function mine(Request $request): JsonResponse
+    {
+        $subscription = $request->user()->currentSubscription();
+
+        return $this->cjenovnik($request, $subscription?->package);
+    }
+
+    private function cjenovnik(Request $request, ?Package $myPackage): JsonResponse
+    {
         $query = trim((string) $request->query('q', ''));
         $category = trim((string) $request->query('category', ''));
 
@@ -45,13 +62,24 @@ class PriceListController extends Controller
             ->get()
             ->filter(fn (PriceCategory $model) => $model->items->isNotEmpty())
             ->values()
-            ->map(fn (PriceCategory $model) => new PriceCategoryResource($model, $packages));
+            ->map(fn (PriceCategory $model) => new PriceCategoryResource($model, $packages, $myPackage));
+
+        $meta = [
+            'price_list_version' => (int) $this->settings->get('price_list_version', 1),
+        ];
+
+        if ($myPackage) {
+            $meta['my_package'] = [
+                'name' => $myPackage->name,
+                'slug' => $myPackage->slug,
+                'labor_discount_pct' => (int) $myPackage->labor_discount_pct,
+                'material_discount_pct' => (int) $myPackage->material_discount_pct,
+            ];
+        }
 
         return response()->json([
             'data' => $categories,
-            'meta' => [
-                'price_list_version' => (int) $this->settings->get('price_list_version', 1),
-            ],
+            'meta' => $meta,
         ]);
     }
 }

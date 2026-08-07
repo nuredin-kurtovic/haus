@@ -102,4 +102,57 @@ class Job extends Model
     {
         return $this->hasMany(NotificationLog::class);
     }
+
+    /**
+     * Sljedeci broj naloga: HAUS-{godina}-{redni:04d}. Sekvenca se vrti po godini.
+     *
+     * Zvati unutar transakcije. Jedinstveni indeks na `number` je zadnja brana,
+     * pa pozivalac hvata sudar i pokusava ponovo (vidi JobService).
+     */
+    public static function nextNumber(?int $year = null): string
+    {
+        $prefix = 'HAUS-'.($year ?? (int) now()->year).'-';
+
+        $last = static::query()
+            ->where('number', 'like', $prefix.'%')
+            ->lockForUpdate()
+            ->orderByDesc('number')
+            ->value('number');
+
+        $next = $last ? ((int) substr((string) $last, strlen($prefix))) + 1 : 1;
+
+        return $prefix.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Koraci napretka za klijentski prikaz.
+     * Prijava je primljena cim nalog postoji, ostalo prati stanje naloga.
+     *
+     * @return array<int, array{key: string, label: string, done: bool}>
+     */
+    public function steps(): array
+    {
+        return [
+            [
+                'key' => 'prijava_primljena',
+                'label' => 'Prijava primljena',
+                'done' => true,
+            ],
+            [
+                'key' => 'majstor_dodijeljen',
+                'label' => 'Majstor dodijeljen',
+                'done' => $this->technician_id !== null,
+            ],
+            [
+                'key' => 'termin_potvrdjen',
+                'label' => 'Termin potvrđen',
+                'done' => $this->scheduled_window_start !== null,
+            ],
+            [
+                'key' => 'majstor_krenuo',
+                'label' => 'Majstor krenuo',
+                'done' => $this->status === JobStatus::UToku,
+            ],
+        ];
+    }
 }

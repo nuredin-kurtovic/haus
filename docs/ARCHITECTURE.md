@@ -8,7 +8,7 @@
 | Web frontend | Vue 3 SPA (Composition API) + vue-router + Pinia, Vite | Umjesto Inertie: mobile ionako treba REST API, pa SPA + REST znači da se svaki endpoint gradi jednom i služi oba klijenta. Jedan izvor istine bez dupliranja kontrolera. |
 | API | REST pod `/api/v1`, JSON | Ugovor u docs/API.md. |
 | Auth | Sanctum personal access tokens za oba klijenta | Jedan auth mehanizam za SPA i mobile. Token u localStorage (web) i react-native-keychain (mobile). |
-| Uloge | spatie/laravel-permission: `klijent`, `majstor`, `dispecer` | Majstor je faza 2, ali uloga i model postoje od prvog dana. |
+| Uloge | spatie/laravel-permission: `klijent`, `majstor`, `dispecer` | Majstor (serviser) je punopravan MOBILNI korisnik u ovom buildu: svoji nalozi, "krenuo sam" (u_toku), nalaz, slike prije/poslije kamerom, pozicije iz cjenovnika i materijal, završetak naloga. Admin web je strana dispečera. Izvještaj klijentu se generiše iz majstorovog unosa. |
 | Baza | MySQL 9.5 (lokalno, baza `haus`, root bez lozinke) | |
 | Queue | Redis + Horizon. Database queue fallback tabela preimenovana u `queue_jobs` | Domenska tabela naloga se zove `jobs` po specu; kolizija sa Laravelovom queue tabelom riješena preimenovanjem queue tabele u config/queue.php. |
 | Scheduler | `php artisan schedule:work` lokalno; cron u produkciji | Rokovi, obnove, podsjetnici. |

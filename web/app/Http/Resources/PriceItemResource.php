@@ -16,8 +16,9 @@ class PriceItemResource extends JsonResource
 {
     /**
      * @param  Collection<int, Package>  $packages
+     * @param  Package|null  $myPackage  paket prijavljenog klijenta, dodaje my_price
      */
-    public function __construct($resource, private Collection $packages)
+    public function __construct($resource, private Collection $packages, private ?Package $myPackage = null)
     {
         parent::__construct($resource);
     }
@@ -28,13 +29,20 @@ class PriceItemResource extends JsonResource
     public function toArray(Request $request): array
     {
         $calculator = app(PriceCalculator::class);
+        $base = (float) $this->base_price;
 
-        return [
+        $payload = [
             'id' => $this->id,
             'name' => $this->name,
             'unit' => $this->unit,
-            'base_price' => (float) $this->base_price,
-            'prices' => $calculator->pricesForPackages((float) $this->base_price, $this->packages),
+            'base_price' => $base,
+            'prices' => $calculator->pricesForPackages($base, $this->packages),
         ];
+
+        if ($this->myPackage) {
+            $payload['my_price'] = $calculator->subscriberPrice($base, $this->myPackage->labor_discount_pct);
+        }
+
+        return $payload;
     }
 }
