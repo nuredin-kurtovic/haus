@@ -50,11 +50,7 @@ export function WelcomeScreen() {
         <Image
           source={require('../../../assets/images/majstor.png')}
           style={styles.photo}
-          // Task: "Image sa resizeMode cover, align dno, overflow hidden".
-          // Prototip koristi object-fit:contain na fiksnoj visini; ovdje
-          // slika puni preostali prostor (flex:1) i biva isječena po
-          // potrebi, poravnata uz dno kontejnera.
-          resizeMode="cover"
+          resizeMode="contain"
           accessibilityLabel="HAUS majstor"
         />
       </View>
@@ -110,8 +106,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   photo: {
-    width: '100%',
+    // Cijela figura vidljiva, skalirana na preostalu visinu i oslonjena na
+    // dno (na ember footer), po prototipu. Cover je rezao glavu na visokim
+    // ekranima. 701/1024 je prirodni odnos majstor.png.
     height: '100%',
+    aspectRatio: 701 / 1024,
+    alignSelf: 'center',
   },
   emberWrap: {
     backgroundColor: colors.ember,
