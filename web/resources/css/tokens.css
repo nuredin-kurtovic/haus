@@ -1,0 +1,56 @@
+/* HAUS design tokeni. Izvor: design/README.md. Ova pravila su ugovorna. */
+:root {
+  --ink: #252422;
+  --ember: #FE5100;
+  --ember-dark: #D94500;
+  --ivory: #FFFCF2;
+  --sand: #CCC5B9;
+  --bark: #403D39;
+  --grey: #8A857E;
+  --white: #FFFFFF;
+  --zebra: #FDFCF8;
+  --error: #B03000;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+  margin: 0;
+}
+
+html {
+  font-family: 'Poppins', sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+}
+
+body { font-weight: 300; font-size: 16px; line-height: 1.5; }
+
+h1, h2, h3, h4 { font-weight: 700; }
+
+/* Cifre su uvijek tabularne */
+.num, td, time, [data-num] { font-variant-numeric: tabular-nums; }
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--ember);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover { text-decoration-thickness: 3px; }
+
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: inherit; }
+
+img { max-width: 100%; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* Prelazi: samo background, color, border-color, opacity */
+button, a, input, select { transition: background .2s ease, color .2s ease, border-color .2s ease, opacity .2s ease; }

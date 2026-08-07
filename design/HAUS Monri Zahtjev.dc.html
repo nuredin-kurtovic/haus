@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0;font-family:Poppins,system-ui,sans-serif;font-weight:300;color:#252422}
+a{color:#252422;text-decoration:underline;text-decoration-color:#FE5100;text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:#252422;text-decoration-thickness:3px}
+.kept{break-inside:avoid;orphans:3;widows:3}
+</style>
+</helmet>
+
+<doc-page margin="0.75in">
+
+  <div slot="footer" style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding-top:10px;border-top:1px solid #CCC5B9;font-size:9pt;font-weight:400;color:#403D39">
+    <span>KUCNI MAJSTOR, vl. Maslic Hrustan</span>
+    <span>Zahtjev za kartično plaćanje</span>
+    <span>06.08.2026.</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;padding-bottom:16px;border-bottom:3px solid #252422;margin-bottom:26px">
+    <img src="./logo-primary.svg" alt="HAUS" width="150" height="33" style="display:block">
+    <span style="font-size:9.5pt;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#403D39">Za: Monri Payments</span>
+  </div>
+
+  <h1 style="font-size:24pt;font-weight:700;line-height:1.15;letter-spacing:-0.01em;margin:0 0 12px">Zahtjev za integraciju kartičnog plaćanja</h1>
+  <p style="font-size:12pt;font-weight:400;line-height:1.6;color:#403D39;margin:0 0 26px;max-width:34em">Gradimo HAUS, pretplatu na održavanje doma. Pretplata se plaća unaprijed i obnavlja se svake godine, pa nam kartično plaćanje nije dodatna opcija nego uslov da proizvod radi. Ovaj dokument objašnjava projekat i sadrži pitanja na koja nam treba odgovor.</p>
+
+  <h2 style="font-size:13pt;font-weight:700;line-height:1.25;margin:0 0 12px">Podaci o firmi</h2>
+  <table style="width:100%;border-collapse:collapse;margin:0 0 28px" class="kept">
+    <tbody>
+      <tr style="border-bottom:1px solid #CCC5B9">
+        <td style="padding:9px 0;font-size:10.5pt;color:#403D39;width:34%">Naziv</td>
+        <td style="padding:9px 0;font-size:10.5pt;font-weight:600">KUCNI MAJSTOR, vl. Maslic Hrustan</td>
+      </tr>
+      <tr style="border-bottom:1px solid #CCC5B9">
+        <td style="padding:9px 0;font-size:10.5pt;color:#403D39">Adresa</td>
+        <td style="padding:9px 0;font-size:10.5pt">Ilovaca 21, 72270 Travnik, Bosna i Hercegovina</td>
+      </tr>
+      <tr style="border-bottom:1px solid #CCC5B9">
+        <td style="padding:9px 0;font-size:10.5pt;color:#403D39">JIB</td>
+        <td style="padding:9px 0;font-size:10.5pt;font-variant-numeric:tabular-nums">4337837950006</td>
+      </tr>
+      <tr style="border-bottom:1px solid #CCC5B9">
+        <td style="padding:9px 0;font-size:10.5pt;color:#403D39">Datum osnivanja</td>
+        <td style="padding:9px 0;font-size:10.5pt;font-variant-numeric:tabular-nums">26.11.2020.</td>
+      </tr>
+      <tr style="border-bottom:1px solid #CCC5B9">
+        <td style="padding:9px 0;font-size:10.5pt;color:#403D39">Status</td>
+        <td style="padding:9px 0;font-size:10.5pt">Aktivan</td>
+      </tr>
+      <tr style="border-bottom:1px solid #CCC5B9">
+        <td style="padding:9px 0;font-size:10.5pt;color:#403D39">Proizvod</td>
+        <td style="padding:9px 0;font-size:10.5pt">HAUS, pretplata na održavanje doma</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-size:13pt;font-weight:700;line-height:1.25;margin:0 0 10px">Šta je HAUS</h2>
+  <p style="font-size:11pt;font-weight:400;line-height:1.65;margin:0 0 12px">Domaćinstvo plati godišnju pretplatu i dobije jedno mjesto za prijavu kvara: vodovod, elektrika, grijanje, klimatizacija, stolarija i bravarija. Cijena rada je javna i klijent je potvrđuje prije nego majstor uzme alat. Rok izlaska je garantovan paketom. Sve ide kroz web i mobilnu aplikaciju, bez telefonskih poziva.</p>
+  <p style="font-size:11pt;font-weight:400;line-height:1.65;margin:0 0 22px">Radimo u Sarajevu i Travniku. Više gradova je u pripremi. Majstori su naši zaposleni, ne posrednici. Tri paketa: 59 KM, 169 KM i 390 KM po stanu godišnje.</p>
+
+  <figure style="margin:0 0 22px" class="kept">
+    <img src="./shots/01-web-naslovna.png" alt="Naslovna stranica HAUS weba" style="display:block;width:100%;height:auto;border:1px solid #CCC5B9">
+    <figcaption style="font-size:9.5pt;font-weight:400;color:#403D39;padding-top:8px;line-height:1.5">Naslovna stranica. Klijent ulazi u pretplatu odavde, iz weba ili iz mobilne aplikacije.</figcaption>
+  </figure>
+
+  <figure style="margin:0 0 26px" class="kept">
+    <img src="./shots/02-web-paketi.png" alt="Tri paketa pretplate sa cijenama" style="display:block;width:100%;height:auto;border:1px solid #CCC5B9">
+    <figcaption style="font-size:9.5pt;font-weight:400;color:#403D39;padding-top:8px;line-height:1.5">Paketi. Ovo je iznos koji se naplaćuje karticom pri registraciji i ponovo pri automatskoj obnovi godinu dana kasnije. Paketi i cijene nisu konačni i mogu se mijenjati do kraja implementacije.</figcaption>
+  </figure>
+
+  <h2 style="font-size:13pt;font-weight:700;line-height:1.25;margin:0 0 10px">Gdje nam treba plaćanje</h2>
+  <ul style="margin:0 0 26px;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+    <li style="display:grid;grid-template-columns:8px 1fr;gap:13px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="width:7px;height:7px;background:#FE5100;display:block;margin-top:7px"></span><span>Prva pretplata pri registraciji, na webu i u mobilnoj aplikaciji.</span></li>
+    <li style="display:grid;grid-template-columns:8px 1fr;gap:13px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="width:7px;height:7px;background:#FE5100;display:block;margin-top:7px"></span><span>Automatska godišnja obnova sa sačuvane kartice, bez prisustva klijenta.</span></li>
+    <li style="display:grid;grid-template-columns:8px 1fr;gap:13px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="width:7px;height:7px;background:#FE5100;display:block;margin-top:7px"></span><span>Naplata rada i materijala poslije intervencije, varijabilan iznos.</span></li>
+    <li style="display:grid;grid-template-columns:8px 1fr;gap:13px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="width:7px;height:7px;background:#FE5100;display:block;margin-top:7px"></span><span>Refund, puni i djelimični, za garancijske slučajeve i otkazivanja.</span></li>
+    <li style="display:grid;grid-template-columns:8px 1fr;gap:13px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="width:7px;height:7px;background:#FE5100;display:block;margin-top:7px"></span><span>Račun na mejl odmah nakon uplate pretplate, i izvještaj o intervenciji sa slikama u roku od 24 sata. Zato nam treba potvrda transakcije mašinski, ne ručnim pregledom izvoda.</span></li>
+    <li style="display:grid;grid-template-columns:8px 1fr;gap:13px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="width:7px;height:7px;background:#FE5100;display:block;margin-top:7px"></span><span>Kartice izdate izvan BiH, jer dio klijenata su ljudi iz dijaspore koji izdaju stan.</span></li>
+  </ul>
+
+  <div style="background:#FE5100;padding:3px;margin:0 0 22px" class="kept">
+    <div style="background:#FFFCF2;padding:20px 22px">
+      <h2 style="font-size:13pt;font-weight:700;margin:0 0 14px">Pitanja za vas</h2>
+      <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px">
+        <li style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="font-weight:700;color:#252422;font-variant-numeric:tabular-nums">01</span><span>Šta je sve potrebno sa naše strane: dokumenti, tehnički uslovi, uslovi za firmu?</span></li>
+        <li style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="font-weight:700;color:#252422;font-variant-numeric:tabular-nums">02</span><span>Podržavate li čuvanje kartice i naplatu obnove bez prisustva klijenta, na godišnjem ciklusu?</span></li>
+        <li style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="font-weight:700;color:#252422;font-variant-numeric:tabular-nums">03</span><span>Kolike su naknade po transakciji, za domaće i za strane kartice, i koji je rok isplate na naš račun?</span></li>
+        <li style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="font-weight:700;color:#252422;font-variant-numeric:tabular-nums">04</span><span>Imate li SDK ili preporučeni tok za plaćanje unutar mobilne aplikacije?</span></li>
+        <li style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="font-weight:700;color:#252422;font-variant-numeric:tabular-nums">05</span><span>Kada možemo dobiti pristup test okruženju i dokumentaciji, da razvoj ide paralelno sa ugovaranjem?</span></li>
+        <li style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-size:10.5pt;font-weight:400;line-height:1.6"><span style="font-weight:700;color:#252422;font-variant-numeric:tabular-nums">06</span><span>Koliko realno traje put od potpisa do produkcije?</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div style="border:1px solid #252422;padding:18px 20px;margin:0 0 28px" class="kept">
+    <h2 style="font-size:11.5pt;font-weight:700;margin:0 0 8px">Kontakt</h2>
+    <p style="font-size:10.5pt;font-weight:400;line-height:1.7;margin:0 0 12px;color:#403D39">KUCNI MAJSTOR, vl. Maslic Hrustan · Ilovaca 21, 72270 Travnik</p>
+    <p style="font-size:10.5pt;font-weight:400;line-height:1.7;margin:0"><strong style="font-weight:600;color:#252422">Nuredin Kurtović</strong>, software developer<br>nkgraphicandweb@gmail.com · 061 052 450 · nuredinkurtovic.info</p>
+  </div>
+
+</doc-page>
+</x-dc>
+</body>
+</html>
