@@ -2,10 +2,12 @@
 
 namespace App\Services\Payments;
 
+use App\Contracts\PaymentGateway;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Mail\RacunMail;
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentToken;
 use App\Models\Subscription;
@@ -13,6 +15,7 @@ use App\Services\NotificationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Knjizenje ishoda naplate. Poziva ga webhook, kasnije i MIT obnova.
@@ -22,7 +25,10 @@ use Illuminate\Support\Facades\Mail;
  */
 class PaymentProcessor
 {
-    public function __construct(private readonly NotificationService $notifications) {}
+    public function __construct(
+        private readonly NotificationService $notifications,
+        private readonly PaymentGateway $gateway,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $payload
@@ -96,6 +102,63 @@ class PaymentProcessor
             'status' => PaymentStatus::Neuspjesan,
             'gateway_payload' => $payload,
         ]);
+    }
+
+    /**
+     * Pun ili djelimican povrat po fakturi.
+     *
+     * Iznos null znaci povrat cijelog neponistenog dijela. Poziv prema
+     * gatewayu ide kroz interfejs, pa isti kod radi i sa pravim Monrijem.
+     */
+    public function refund(Invoice $invoice, ?float $amount = null): Invoice
+    {
+        /** @var Payment|null $payment */
+        $payment = $invoice->payments()
+            ->where('status', PaymentStatus::Uspjesan)
+            ->latest('id')
+            ->first();
+
+        if (! $payment) {
+            throw ValidationException::withMessages([
+                'invoice' => 'Faktura nema proknjiženu uplatu, povrat nije moguć.',
+            ]);
+        }
+
+        $placeno = (float) $payment->amount;
+        $vecVraceno = (float) $invoice->refunded_amount;
+        $preostalo = round($placeno - $vecVraceno, 2);
+
+        $iznos = round($amount ?? $preostalo, 2);
+
+        if ($iznos <= 0) {
+            throw ValidationException::withMessages([
+                'amount' => 'Iznos povrata mora biti veći od nule.',
+            ]);
+        }
+
+        if ($iznos > $preostalo) {
+            throw ValidationException::withMessages([
+                'amount' => 'Iznos povrata je veći od uplaćenog iznosa. Najviše možete vratiti '
+                    .number_format($preostalo, 2, ',', '.').' KM.',
+            ]);
+        }
+
+        if (! $this->gateway->refund($payment, $iznos)) {
+            throw ValidationException::withMessages([
+                'invoice' => 'Gateway je odbio povrat.',
+            ]);
+        }
+
+        $ukupnoVraceno = round($vecVraceno + $iznos, 2);
+
+        $invoice->update([
+            'refunded_amount' => $ukupnoVraceno,
+            'status' => $ukupnoVraceno >= $placeno
+                ? InvoiceStatus::Refundirano
+                : InvoiceStatus::DjelimicnoRefundirano,
+        ]);
+
+        return $invoice->refresh();
     }
 
     /**

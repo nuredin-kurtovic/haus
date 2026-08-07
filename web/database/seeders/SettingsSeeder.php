@@ -49,7 +49,7 @@ class SettingsSeeder extends Seeder
             'majstor_krenuo' => 'HAUS: Majstor {majstor} je krenuo. Kod vas je do {do}. Nalog {broj}.',
             'kasnjenje' => 'HAUS: Kasnimo {minuta} min, prethodni nalog se otegao. Novo vrijeme: {novo_vrijeme}. Izvinjavamo se.',
             'rok_probijen' => 'HAUS: Nismo ispunili obećani rok. Vaša sljedeća intervencija je besplatna, već je upisana.',
-            'zavrseno' => 'HAUS: Sređeno. Garancija na rad do {garancija_do}. Nalaz i fotografije su u vašem kartonu.',
+            'zavrseno' => 'HAUS: Sređeno. Garancija na rad do {garancija_datum}. Nalaz i fotografije su u vašem kartonu.',
             'pretplata_aktivna' => 'HAUS: Pretplata je aktivna. Paket {paket}, vrijedi do {vrijedi_do}. Prvu prijavu možete poslati odmah.',
             'obnova_podsjetnik' => 'HAUS: Pretplata ističe {datum}. Obnova je automatska, iznos je {iznos} KM. Otkazivanje je jedan klik u profilu.',
         ];

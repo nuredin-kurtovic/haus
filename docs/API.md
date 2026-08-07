@@ -111,25 +111,123 @@ Bez tokena: 401 `{message: "Niste prijavljeni."}`. Pogrešna uloga: 403 `{messag
 
 **`POST /client/address-change-request`** `{message min 10, subscription_property_id?}` > 201 `{message}`. Upisuje `home_records` red tipa `napomena` sa naslovom "Zahtjev za promjenu adrese" na klijentovu adresu i šalje mejl dispečeru (`settings.dispecer_email`, fallback `config services.haus.dispatcher_email`). Bez izbora ide prva adresa pretplate.
 
+## Serviser (uloga: majstor)
+
+Serviser je mobilni korisnik. Nalog završava serviser kroz mobilnu aplikaciju; izvještaj klijentu se generiše iz njegovog unosa.
+
+| GET | `/technician/jobs?status=&date=` | Samo nalozi dodijeljeni tom serviseru: `{id, number, status, type, is_emergency, category, description, client: {name}, address: {city, street}, scheduled_window_start/end, deadline_at}`. Default sortiranje po prozoru. |
+| GET | `/technician/jobs/{id}` | Detalj (samo svoj, inače 404): + klijentova fotografija prijave, napomena o pristupu, preostali izlasci klijenta (da serviser zna ide li na naplatu). |
+| POST | `/technician/jobs/{id}/start` | zakazano > u_toku. Šalje klijentu predložak majstor_krenuo. Idempotentno unutar u_toku. |
+| GET | `/technician/price-list` | Objavljene pozicije po kategorijama (za izbor stavki), bez izračuna po paketima. |
+| POST | `/technician/jobs/{id}/complete` | `{findings, items: [{price_item_id, qty}], materials: [{name, purchase_price, qty}]}` + multipart `photos_before[]`, `photos_after[]` (min 1 prije i 1 poslije). Ide kroz isti JobCompletionService kao admin complete. |
+
+Serviserski nalog traži red u `technicians` vezan na korisnika (`user_id`). Bez te veze, ili kad je majstor isključen: 403 sa porukom. Seed pravi četiri naloga: `damir@haus.ba`, `emir@haus.ba`, `adnan@haus.ba`, `senad@haus.ba`, lozinka `haus1234`.
+
+**`GET /technician/jobs/{id}`** > `{data}`: sva polja reda iz liste, plus
+
+```
+{preferred_window, findings, package,
+ contact: {name, note},
+ entitlements: {remaining_visits, remaining_inspections, free_interventions, ide_na_naplatu},
+ photos: [{type: prije|poslije, url}]}
+```
+
+`ide_na_naplatu` je `true` kad su i kredit i izlasci potrošeni, pa rad ide na račun. Za tip garancija i pregled je uvijek `false`.
+
+**`POST /technician/jobs/{id}/start`** > `{data, message}`. Iz stanja `novo`: 422 "Izlazak se pokreće samo na zakazanom nalogu." Ponovljen poziv u `u_toku` vraća 200 i ne šalje obavještenje drugi put.
+
+**`POST /technician/jobs/{id}/complete`** > `{data: {id, number, status, completed_at, warranty_until, visit_source, invoice: {id, number, status, labor_total, material_total, total}}, message}`. Multipart; `items` i `materials` mogu stići i kao JSON tekst. Zatvaranje je moguće samo iz `u_toku`, inače 422.
+
+### Završetak naloga (JobCompletionService, isti za servisera i dispečera)
+
+- **Stavke rada**: snapshot iz cjenovnika u trenutku zatvaranja (`name`, `base_price`, `discount_pct` = `labor_discount_pct` klijentovog paketa, `line_total` = zaokruženo na cijeli KM x količina). Kasnija objava cjenovnika ne mijenja zatvoren nalog.
+- **Materijal**: `nabavna x (1 + settings.materijal_marza_pct/100)` pa `material_discount_pct` paketa, na dvije decimale.
+- **Redoslijed trošenja** (`jobs.visit_source`): `subscriptions.free_interventions` > `subscription_properties.remaining_visits` > naplata.
+- **Šta se naplaćuje**:
+
+  | tip / izvor | rad na fakturi | materijal na fakturi | troši |
+  |---|---|---|---|
+  | redovno, `kredit` | 0 | puni iznos | 1 besplatnu intervenciju |
+  | redovno, `izlazak` | 0 | puni iznos | 1 izlazak na toj adresi |
+  | redovno, `naplata` | puni iznos | puni iznos | ništa (nema prava) |
+  | `garancija` | 0 | 0 | ništa |
+  | `pregled` | 0 | puni iznos | 1 pregled na toj adresi |
+
+  Kredit i izlazak pokrivaju rad u cijelosti. Stavke rada se svejedno upisuju sa svojim iznosom, da klijent vidi vrijednost koju je dobio; na fakturi je `labor_total` tada 0.
+- **Faktura** tipa `rad` se pravi uvijek, i kad je iznos 0. Status je `nenaplaceno` kad je `total > 0`, inače `bez_naplate`.
+- **Garancija**: `warranty_until = completed_at + package.warranty_months`. Nalog tipa `garancija` nasljeđuje `warranty_until` originala (`parent_job_id`), ne otvara novu.
+- **Trag**: `jobs.status = zavrseno`, `completed_at`, red u `home_records` (tip `pregled` za pregled, inače `intervencija`) na adresi naloga, obavještenje `zavrseno` sa `{broj}` i `{garancija_datum}` (dd.mm.gggg) i queued izvještaj na mejl (nalaz, stavke, materijal, linkovi na slike prije i poslije, datum garancije).
+- Sve upisano ide u jednoj transakciji; fotografije, obavještenje i mejl idu tek nakon commita.
+
 ## Dispečer (uloga: dispecer)
 
 | GET | `/admin/dashboard` | KPI, rokovi koji padaju danas, raspored po prozorima, obnove uskoro. |
-| GET | `/admin/jobs?status=&q=` | Lista sa brojačima po stanju. |
-| GET | `/admin/jobs/{id}` | Detalj + klijent + pretplata + historija. |
-| PATCH | `/admin/jobs/{id}` | Dodjela i tranzicije: `{technician_id?, scheduled_window_start?, scheduled_window_end?, status?}`. Prozor je tačno 2h. Validne tranzicije: novo>zakazano (traži majstora i prozor), zakazano>u_toku, u_toku>zavrseno (traži nalaz; stavke idu posebnim endpointom). Svaka tranzicija šalje obavještenje klijentu po predlošku. |
-| GET | `/admin/jobs/{id}/notification-preview?status=` | Tačan tekst obavještenja koje bi klijent dobio za tu tranziciju. |
-| POST | `/admin/jobs/{id}/complete` | `{findings, items: [{price_item_id, qty}], materials: [{name, purchase_price, qty}]}` + multipart `photos_before[]`, `photos_after[]`. Server računa račun, garanciju, troši kredit/izlazak, šalje izvještaj. |
-| POST | `/admin/jobs/{id}/warranty-job` | Otvara garancijski nalog vezan na original. |
-| GET | `/admin/clients`, GET `/admin/clients/{id}` | Klijenti + karton doma. |
-| GET | `/admin/subscriptions` | Iskorištenost, obnove; filteri. |
-| GET | `/admin/billing` | Fakture, rad i materijal razdvojeni, state chipovi. |
-| POST | `/admin/invoices/{id}/refund` | `{amount?}` pun ili djelimičan, ide kroz PaymentService. |
-| GET | `/admin/price-list` | Draft + objavljeno + dirty flag po redu. |
+| GET | `/admin/jobs?status=&q=&per_page=` | Lista sa brojačima po stanju. |
+| GET | `/admin/jobs/{id}` | Detalj + klijent + pretplata + stavke + račun + historija obavještenja. |
+| PATCH | `/admin/jobs/{id}` | Dodjela i tranzicije: `{technician_id?, scheduled_window_start?, scheduled_window_end?, status?}`. |
+| GET | `/admin/jobs/{id}/notification-preview?status=&technician_id=&scheduled_window_start=&scheduled_window_end=` | Tačan tekst obavještenja koje bi tranzicija poslala, bez slanja. |
+| POST | `/admin/jobs/{id}/complete` | Isti ulaz i isti servis kao serviserov complete (dispečer unosi u ime majstora). |
+| POST | `/admin/jobs/{id}/warranty-job` | `{description?, price_category_id?}`. Otvara garancijski nalog vezan na original. |
+| GET | `/admin/clients?q=&per_page=`, GET `/admin/clients/{id}` | Klijenti + karton doma. |
+| GET | `/admin/subscriptions?status=&q=` | Iskorištenost prava, obnove. |
+| GET | `/admin/billing?status=&type=&q=` | Fakture, rad i materijal razdvojeni, brojači po stanju. |
+| POST | `/admin/invoices/{id}/refund` | `{amount?}` pun ili djelimičan, ide kroz `PaymentGateway::refund`. |
+| GET | `/admin/price-list` | Draft + objavljeno + `dirty` po redu. |
 | PUT | `/admin/price-list/items/{id}` | `{draft_base_price}`. |
 | POST | `/admin/price-list/publish` | Objavi sve draftove odjednom (web + mobile istovremeno). |
-| CRUD | `/admin/cities` | POST validira BiH bounding box (lat 42–46, lon 15–20), novi grad je `u_pripremi`. PATCH `{status}`. DELETE samo bez pretplata. |
-| GET/PUT | `/admin/settings` | Radno vrijeme, satnice, doplate, tiers, predlošci obavještenja. |
-| CRUD | `/admin/technicians` | Ime, zanat, aktivan. |
+| CRUD | `/admin/cities` | POST validira BiH bounding box (lat 42–46, lng 15–20), novi grad je `u_pripremi`. PATCH `{status?, name?, lat?, lng?}`. DELETE 422 ako grad ima adrese. |
+| GET/PUT | `/admin/settings` | Radno vrijeme, satnice, tiers, predlošci obavještenja. |
+| GET/PUT | `/admin/surcharges`, `/admin/surcharges/{id}` | `{value, active}`. |
+| CRUD | `/admin/technicians` | `{name, trade, active, email?, password?}`. |
+
+### Detalji dispečerskih odgovora
+
+**`GET /admin/dashboard`**
+
+```
+{kpi: {novi_danas, aktivni_nalozi, rokovi_danas, prosjek_zavrsetka_h, aktivne_pretplate},
+ deadlines_today: [red naloga],
+ schedule_today: [{window: "10:00 do 12:00", starts_at, ends_at, jobs: [red naloga]}],
+ renewals_soon: [{id, client: {id, name, email}, package, ends_at, auto_renew, dana_do_isteka}]}
+```
+
+`prosjek_zavrsetka_h` je prosjek sati od prijave do završetka za naloge zatvorene u zadnjih 30 dana, `null` kad ih nema. `deadlines_today` su nezavršeni nalozi kojima `deadline_at` pada danas. `renewals_soon` su aktivne pretplate koje ističu u sljedećih 60 dana.
+
+**`GET /admin/jobs`** > `{data: [red], meta: {counts: {novo, zakazano, u_toku, zavrseno, ukupno}, total, per_page, current_page, last_page}}`. Brojači prate pretragu `q`, ne filter `status`. `q` traži po broju naloga, opisu, imenu i mejlu klijenta i ulici. Red:
+
+```
+{id, number, status, type, is_emergency, category, title, client: {id, name, email},
+ address: {city, street}, technician: {id, name}|null, scheduled_window_start,
+ scheduled_window_end, deadline_at, deadline_missed_at, completed_at, created_at}
+```
+
+**`GET /admin/jobs/{id}`** > `{data}`: sva polja reda, plus `description`, `preferred_window`, `findings`, `warranty_until`, `visit_source`, `parent_job`, `contact: {name, note}`, `subscription: {id, status, package, ends_at, free_interventions, remaining_visits, remaining_inspections}`, `items[]`, `materials[]`, `photos[]`, `invoice`, `notifications: [{id, channel, template_key, body, sent_at}]`.
+
+**`PATCH /admin/jobs/{id}`** > `{data: red naloga, notifications_sent: [template_key], message}`.
+
+- Prozor stiže u paru i traje **tačno 2 sata**, u istom danu. Radno vrijeme dolazi iz `settings.radno_vrijeme`: pon-pet 08:00–18:00, subota 09:00–14:00. Nedjelja se odbija osim kad je `is_emergency`. Greška ide na `errors.scheduled_window_start`.
+- `novo > zakazano` traži majstora i prozor. Šalje `termin_potvrdjen` sa `{dan}` (bosanski naziv dana), `{datum}` (dd.mm.gggg), `{od}`, `{do}`, `{majstor}`, `{broj}`.
+- Novi prozor ili novi majstor na već zakazanom nalogu je dozvoljen i ponovo šalje `termin_potvrdjen`.
+- `zakazano > u_toku` je dozvoljen (dispečer može umjesto majstora) i šalje `majstor_krenuo`, osim ako ga je majstor već poslao kroz `start`.
+- `u_toku > zavrseno` **ne ide ovuda**: 422 "Nalog se zatvara nalazom. Koristite završetak naloga."
+- Povratak u `novo` i izmjena završenog naloga: 422.
+- Dodjela majstora bez stanja je dozvoljena i ne šalje ništa (korak `majstor_dodijeljen` u klijentskom prikazu).
+
+**`GET /admin/jobs/{id}/notification-preview`** > `{data: {template_key, body}}`. `status` je obavezan. Za `zakazano` se koriste proslijeđeni `technician_id` i prozor, a što nije poslano uzima se sa naloga. Stanje bez obavještenja (`novo`): 422.
+
+**`POST /admin/jobs/{id}/warranty-job`** > 201 `{data: red naloga, message}`. Original mora biti `zavrseno`, inače 422. Novi nalog nasljeđuje klijenta, pretplatu, adresu i kategoriju, tip je `garancija`, `parent_job_id` pokazuje na original, rok se računa iz paketa. Šalje `prijava_primljena`.
+
+**`GET /admin/clients/{id}`** > `{data: {client, subscriptions[], properties[], jobs[], invoices[], home_records[]}}`. `home_records` je karton doma po svim adresama klijenta, najnoviji prvi.
+
+**`GET /admin/subscriptions`** > red nosi `usage: {visits_total, visits_remaining, visits_used, inspections_total, inspections_remaining, inspections_used}`. Ukupno je pravo paketa pomnoženo brojem adresa, preostalo je zbir preko adresa.
+
+**`POST /admin/invoices/{id}/refund`** > `{data: red fakture, message}`. Bez `amount` vraća cijeli još nevraćeni iznos. Faktura bez uspješne uplate: 422 na `errors.invoice`. Iznos veći od uplaćenog: 422 na `errors.amount`. Pun povrat: `invoices.status = refundirano` i uplata `refundiran`; djelimičan: `djelimicno_refundirano`, uplata ostaje `uspjesan`, `refunded_amount` se zbraja.
+
+**`POST /admin/price-list/publish`** > `{data: {published, price_list_version}, message}`. `published` je broj redova kojima se cijena zaista promijenila. Publish kopira sve draftove u `base_price`, briše draftove i diže `price_list_version`.
+
+**`GET/PUT /admin/settings`** > `{data}` sa ključevima `radno_vrijeme`, `satnica_redovna`, `satnica_hitna`, `izlazak_bez_pretplate`, `ukljuceno_minuta`, `materijal_marza_pct`, `pro_volume_tiers`, `notification_templates`, `dispecer_email`, plus `price_list_version` i `template_keys` (samo za čitanje). PUT je djelimičan: upisuje se samo ono što stigne. Kad stigne `notification_templates`, moraju biti prisutni svi ključevi iz `template_keys`, inače 422. Nijedan tekst ne smije sadržavati em dash.
+
+**`CRUD /admin/technicians`** > red: `{id, name, trade, active, email, has_account, jobs_count, open_jobs_count}`. Uz `email` je obavezna i `password`; tada se pravi korisnik sa ulogom `majstor` i veže na majstora. DELETE je 422 kad majstor ima naloge; inače briše i vezani korisnički nalog.
 
 ## Dev (samo lokalno)
 

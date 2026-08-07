@@ -1,5 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\BillingController;
+use App\Http\Controllers\Api\Admin\CityController as AdminCityController;
+use App\Http\Controllers\Api\Admin\ClientController as AdminClientController;
+use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\Admin\JobController as AdminJobController;
+use App\Http\Controllers\Api\Admin\PriceListController as AdminPriceListController;
+use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Api\Admin\SubscriptionController as AdminSubscriptionController;
+use App\Http\Controllers\Api\Admin\SurchargeController as AdminSurchargeController;
+use App\Http\Controllers\Api\Admin\TechnicianController as AdminTechnicianController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\Client\AddressChangeController;
@@ -15,6 +25,8 @@ use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PriceListController;
 use App\Http\Controllers\Api\PublicSettingsController;
 use App\Http\Controllers\Api\SurchargeController;
+use App\Http\Controllers\Api\Technician\JobController as TechnicianJobController;
+use App\Http\Controllers\Api\Technician\PriceListController as TechnicianPriceListController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -62,9 +74,59 @@ Route::prefix('v1')->group(function () {
             Route::post('address-change-request', [AddressChangeController::class, 'store']);
         });
 
-        // Dispecerski dio. Sadrzaj dolazi u fazi 5.
+        // Serviserski dio. Majstor vidi samo naloge koji su njemu dodijeljeni.
+        Route::middleware(['role:majstor', 'technician.profile'])->prefix('technician')->group(function () {
+            Route::get('ping', fn () => response()->json(['data' => ['scope' => 'majstor']]));
+
+            Route::get('jobs', [TechnicianJobController::class, 'index']);
+            Route::get('jobs/{id}', [TechnicianJobController::class, 'show'])->whereNumber('id');
+            Route::post('jobs/{id}/start', [TechnicianJobController::class, 'start'])->whereNumber('id');
+            Route::post('jobs/{id}/complete', [TechnicianJobController::class, 'complete'])->whereNumber('id');
+
+            Route::get('price-list', [TechnicianPriceListController::class, 'index']);
+        });
+
+        // Dispecerski dio.
         Route::middleware('role:dispecer')->prefix('admin')->group(function () {
             Route::get('ping', fn () => response()->json(['data' => ['scope' => 'dispecer']]));
+
+            Route::get('dashboard', [AdminDashboardController::class, 'show']);
+
+            Route::get('jobs', [AdminJobController::class, 'index']);
+            Route::get('jobs/{id}', [AdminJobController::class, 'show'])->whereNumber('id');
+            Route::patch('jobs/{id}', [AdminJobController::class, 'update'])->whereNumber('id');
+            Route::get('jobs/{id}/notification-preview', [AdminJobController::class, 'notificationPreview'])->whereNumber('id');
+            Route::post('jobs/{id}/complete', [AdminJobController::class, 'complete'])->whereNumber('id');
+            Route::post('jobs/{id}/warranty-job', [AdminJobController::class, 'warrantyJob'])->whereNumber('id');
+
+            Route::get('clients', [AdminClientController::class, 'index']);
+            Route::get('clients/{id}', [AdminClientController::class, 'show'])->whereNumber('id');
+
+            Route::get('subscriptions', [AdminSubscriptionController::class, 'index']);
+
+            Route::get('billing', [BillingController::class, 'index']);
+            Route::post('invoices/{id}/refund', [BillingController::class, 'refund'])->whereNumber('id');
+
+            Route::get('price-list', [AdminPriceListController::class, 'index']);
+            Route::put('price-list/items/{id}', [AdminPriceListController::class, 'updateItem'])->whereNumber('id');
+            Route::post('price-list/publish', [AdminPriceListController::class, 'publish']);
+
+            Route::get('cities', [AdminCityController::class, 'index']);
+            Route::post('cities', [AdminCityController::class, 'store']);
+            Route::patch('cities/{id}', [AdminCityController::class, 'update'])->whereNumber('id');
+            Route::delete('cities/{id}', [AdminCityController::class, 'destroy'])->whereNumber('id');
+
+            Route::get('settings', [AdminSettingsController::class, 'show']);
+            Route::put('settings', [AdminSettingsController::class, 'update']);
+
+            Route::get('surcharges', [AdminSurchargeController::class, 'index']);
+            Route::get('surcharges/{id}', [AdminSurchargeController::class, 'show'])->whereNumber('id');
+            Route::put('surcharges/{id}', [AdminSurchargeController::class, 'update'])->whereNumber('id');
+
+            Route::get('technicians', [AdminTechnicianController::class, 'index']);
+            Route::post('technicians', [AdminTechnicianController::class, 'store']);
+            Route::patch('technicians/{id}', [AdminTechnicianController::class, 'update'])->whereNumber('id');
+            Route::delete('technicians/{id}', [AdminTechnicianController::class, 'destroy'])->whereNumber('id');
         });
     });
 });

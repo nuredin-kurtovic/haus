@@ -75,6 +75,24 @@ class SeedDataTest extends TestCase
         }
     }
 
+    public function test_majstori_imaju_korisnicke_naloge(): void
+    {
+        // Serviser je punopravan mobilni korisnik, pa svaki majstor iz seeda
+        // ima nalog sa ulogom majstor i vezu na svoj red u technicians.
+        $this->assertSame(4, User::role('majstor')->count());
+
+        foreach (['damir@haus.ba', 'emir@haus.ba', 'adnan@haus.ba', 'senad@haus.ba'] as $email) {
+            $majstor = User::where('email', $email)->firstOrFail();
+
+            $this->assertTrue($majstor->hasRole('majstor'));
+            $this->assertTrue(Hash::check('haus1234', $majstor->password));
+            $this->assertNotNull($majstor->technician);
+            $this->assertTrue($majstor->technician->active);
+        }
+
+        $this->assertSame(0, Technician::whereNull('user_id')->count());
+    }
+
     public function test_predlosci_obavjestenja_postoje_po_kljucevima(): void
     {
         $templates = Setting::where('key', 'notification_templates')->value('value');
@@ -99,6 +117,7 @@ class SeedDataTest extends TestCase
     {
         $roots = [
             base_path('app'),
+            base_path('config'),
             base_path('database'),
             base_path('routes'),
             base_path('tests'),

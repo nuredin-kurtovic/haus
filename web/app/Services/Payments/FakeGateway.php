@@ -10,7 +10,6 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 /**
  * Lokalni gateway bez Monri kredencijala.
@@ -56,9 +55,31 @@ class FakeGateway implements PaymentGateway
         return hash_equals($expected, $signature);
     }
 
+    /**
+     * Povrat. Lokalno nema poziva prema banci, pa uplatu samo oznacimo.
+     * Pun povrat gasi uplatu, djelimicni je ostavlja uspjesnom.
+     */
     public function refund(Payment $payment, ?float $amount = null): bool
     {
-        throw new RuntimeException('Povrat nije implementiran u lokalnom gatewayu.');
+        if ($payment->status !== PaymentStatus::Uspjesan) {
+            return false;
+        }
+
+        $iznos = $amount ?? (float) $payment->amount;
+
+        if ($iznos <= 0 || $iznos > (float) $payment->amount) {
+            return false;
+        }
+
+        $payload = is_array($payment->gateway_payload) ? $payment->gateway_payload : [];
+        $payload['refund'] = ['amount' => round($iznos, 2), 'at' => now()->toIso8601String()];
+
+        $payment->update([
+            'status' => $iznos >= (float) $payment->amount ? PaymentStatus::Refundiran : PaymentStatus::Uspjesan,
+            'gateway_payload' => $payload,
+        ]);
+
+        return true;
     }
 
     /**
