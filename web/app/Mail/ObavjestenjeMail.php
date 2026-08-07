@@ -20,6 +20,9 @@ class ObavjestenjeMail extends Mailable implements ShouldQueue
     /** Mejl je vazan, pa red pokusava tri puta. */
     public int $tries = 3;
 
+    /** Ako je model u medjuvremenu obrisan, mejl se tiho uklanja umjesto da puca. */
+    public bool $deleteWhenMissingModels = true;
+
     /** Razmak izmedju pokusaja: minuta, pa pet, pa petnaest. */
     public array $backoff = [60, 300, 900];
 
