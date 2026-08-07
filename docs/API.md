@@ -11,15 +11,25 @@ Base: `/api/v1`. JSON. Auth: `Authorization: Bearer <sanctum token>`. Sve cijene
 | GET | `/price-list?q=&category=` | Objavljeni cjenovnik: kategorije > pozicije. Svaka pozicija: `{id, name, base_price, prices: {mini: n, plus: n, pro: n}}` (izračunato). |
 | GET | `/surcharges` | Doplate `{key, label, type: percent|per_km|flat, value}`. |
 | GET | `/settings/public` | Radno vrijeme, satnice, verzija cjenovnika. |
-| POST | `/auth/register` | Body: `{package_id, name, email, password, payment_method: uplatnica|kartica, properties: [{city_id, street, use?, contact?}]}`. Mini/Plus šalju tačno 1 property. Pro 2+; 10+ vraća `{status: ponuda}`. Odgovor: `{user, subscription, token, payment?: {redirect_url}}` (redirect samo za karticu). |
-| POST | `/auth/login` | `{email, password}` > `{user, token, role}` |
-| POST | `/webhooks/monri` | Monri status webhook (signature verified, ne Bearer). Aktivira pretplatu / knjiži uplatu mašinski. |
+| POST | `/auth/register` | Body: `{package_id, name, email, password, payment_method: uplatnica|kartica, properties: [{city_id, street, use?, contact_name?, contact_note?}]}`. Mini/Plus šalju tačno 1 property. Pro 2+; 10+ vraća `{status: ponuda}`. Odgovor 201: `{status, user, subscription, token, invoice?, payment?: {redirect_url}}`. `invoice` izostaje kod ponude, `payment` samo za karticu. |
+| POST | `/auth/login` | `{email, password}` > `{user, token, role}`. Pogrešni kredencijali: 422 na `errors.email`. |
+| POST | `/webhooks/monri` | Monri status webhook (signature verified, ne Bearer). Body `{reference, status: approved|declined, masked_pan?, token?}`. Aktivira pretplatu / knjiži uplatu mašinski, idempotentno. Loš potpis: 403. |
+
+### Detalji registracije
+
+- `status` u odgovoru je `subscriptions.status`: `cekanje_uplate` ili `ponuda`.
+- `subscription` nosi `{id, status, package: {id, name, slug, is_per_apartment}, starts_at, ends_at, auto_renew, price, price_paid, free_interventions, remaining_visits, remaining_inspections, properties[]}`. `price` je izračunata godišnja cijena (Pro: cijena po stanu x broj stanova uz tier popust). `starts_at` i `ends_at` su `null` dok uplata ne legne.
+- `token` stiže odmah, i dok pretplata čeka uplatu. Guard koji traži aktivnu pretplatu je na `/client` rutama.
+- Uplatnica: server šalje mejl sa iznosom i pozivom na broj, bez `payment` objekta u odgovoru.
+- Kartica: `payment.redirect_url` vodi na 3DS. Lokalno FakeGateway vodi na `/placanje/simulacija?ref={reference}`.
 
 ## Auth zajedničko
 
-| GET | `/me` | User + uloga + aktivna pretplata (sažetak). |
+| GET | `/me` | `{user: {id, name, email, notif_push, notif_email, notif_marketing}, role, subscription}`. `subscription` je sažetak **aktivne** pretplate `{id, status, package: {id, name, slug}, starts_at, ends_at, remaining_visits, remaining_inspections, free_interventions, properties_count}` ili `null`. Izlasci su zbir preko svih adresa. |
 | POST | `/auth/logout` | Revoke token. |
-| POST | `/devices` | `{fcm_token, platform}` registracija za push. |
+| POST | `/devices` | `{fcm_token, platform: ios|android}` registracija za push, upsert po (korisnik, token). |
+
+Bez tokena: 401 `{message: "Niste prijavljeni."}`. Pogrešna uloga: 403 `{message: "Nemate pristup ovom dijelu aplikacije."}`.
 
 ## Klijent (uloga: klijent)
 
@@ -56,6 +66,7 @@ Base: `/api/v1`. JSON. Auth: `Authorization: Bearer <sanctum token>`. Sve cijene
 ## Konvencije
 
 - Broj naloga: `HAUS-{godina}-{redni:04d}`, generiše server.
+- Broj fakture: `{godina}{redni:06d}`, samo cifre, jer je ujedno poziv na broj na uplatnici. Generiše server.
 - State chip mapping (oba klijenta, iz design/README.md): novo=ink/white, zakazano=bark/ivory, u_toku=ember/ivory tekst, zavrseno=sand/ink, garancija=ink fill/ivory tekst.
 - Paginacija: Laravel standard `{data, links, meta}` na listama gdje treba.
 - Sve mutacije koje mijenjaju stanje naloga upisuju red u `notifications_log` (šta je poslano, kome, kojim kanalom). Tabela se zove `notifications_log` jer Laravel rezerviše `notifications`.

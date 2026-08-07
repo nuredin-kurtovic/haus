@@ -13,7 +13,7 @@
 | Queue | Redis + Horizon. Database queue fallback tabela preimenovana u `queue_jobs` | Domenska tabela naloga se zove `jobs` po specu; kolizija sa Laravelovom queue tabelom riješena preimenovanjem queue tabele u config/queue.php. |
 | Scheduler | `php artisan schedule:work` lokalno; cron u produkciji | Rokovi, obnove, podsjetnici. |
 | Mape | Leaflet 1.9 + OpenStreetMap tiles, atribucija obavezna | Nikad ručno crtana geografija. Pinovi po design/haus-map.js referenci. |
-| Plaćanje | `PaymentService` interfejs + `MonriGateway` (HTTP) + `FakeGateway` za lokalni dev | Lokalno bez Monri kredencijala FakeGateway simulira 3DS redirect i webhook. Prebacivanje driverom u config/services.php. |
+| Plaćanje | `App\Contracts\PaymentGateway` interfejs + `MonriGateway` (HTTP, faza 6) + `FakeGateway` za lokalni dev | Lokalno bez Monri kredencijala FakeGateway simulira 3DS redirect i webhook. Prebacivanje driverom `services.haus.payment_gateway` u config/services.php, binding u AppServiceProvider. Knjiženje ishoda je u `App\Services\Payments\PaymentProcessor` i idempotentno je. |
 | Slike | Laravel Storage (public disk lokalno), multipart upload | job_photos čuva path + tip (prije/poslije). |
 | Mobile | React Native 0.86.2, CLI setup, TypeScript, @react-navigation (native-stack + bottom-tabs), TanStack Query, Zustand, RHF + Zod, react-native-keychain, FCM + notifee | Po specu. |
 
@@ -28,7 +28,8 @@
 - **Objava cjenovnika**: `price_items` ima `draft_base_price` i `base_price` (objavljena). Publish kopira draft u objavljeno u jednoj transakciji i digne `price_list_version` u settings. Web i mobile čitaju samo objavljeno, pa objava pogađa oba istovremeno.
 - **Obnova**: cron dnevno; podsjetnik 60 dana prije isteka; na dan isteka MIT naplata po tokenu ako auto_renew i token postoje, inače uplatnica na mejl.
 - **Pro popust na količinu**: settings JSON tiers `[{min:2,max:4,pct:10},{min:5,max:9,pct:15}]`; 10+ stanova nema automatske naplate, registracija postaje zahtjev za ponudu (`subscriptions.status = ponuda`).
-- **Predlošci obavještenja**: `settings` ključevi po template_key, uređivani u adminu, render sa placeholderima. Ton po specu 1.8, nikad em dash.
+- **Predlošci obavještenja**: `settings` ključevi po template_key, uređivani u adminu, render sa placeholderima. Ton po specu 1.8, nikad em dash. Sva obavještenja idu kroz `App\Services\NotificationService::send()`: renderuje predložak, upiše red u `notifications_log` po kanalu (poštuje `users.notif_push` i `notif_email`) i queue-uje generički mailable. Push je za sada samo log, FCM dolazi kasnije.
+- **Aktivacija pretplate**: registracija upisuje `cekanje_uplate` sa `starts_at`/`ends_at` NULL. Aktivira je isključivo uplata: webhook > `PaymentProcessor::approve()` postavi `aktivna`, `starts_at = now`, `ends_at = +1 godina`, `price_paid`, knjiži fakturu kao `placeno`, spremi token za MIT obnovu, pošalje račun i obavještenje `pretplata_aktivna`.
 
 ## Stanja
 

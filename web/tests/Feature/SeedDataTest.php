@@ -97,7 +97,13 @@ class SeedDataTest extends TestCase
 
     public function test_nigdje_nema_em_dasha(): void
     {
-        $roots = [base_path('app'), base_path('database'), base_path('routes')];
+        $roots = [
+            base_path('app'),
+            base_path('database'),
+            base_path('routes'),
+            base_path('tests'),
+            base_path('resources/views'),
+        ];
         $offenders = [];
 
         foreach ($roots as $root) {

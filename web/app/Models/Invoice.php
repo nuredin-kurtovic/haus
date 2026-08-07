@@ -51,4 +51,24 @@ class Invoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    /**
+     * Sljedeci broj fakture: godina pa redni broj, sve cifre.
+     * Broj fakture je ujedno poziv na broj na uplatnici, zato bez slova i crtica.
+     * Zvati unutar transakcije.
+     */
+    public static function nextNumber(?int $year = null): string
+    {
+        $prefix = (string) ($year ?? (int) now()->year);
+
+        $last = static::query()
+            ->where('number', 'like', $prefix.'%')
+            ->lockForUpdate()
+            ->orderByDesc('number')
+            ->value('number');
+
+        $next = $last ? ((int) substr((string) $last, strlen($prefix))) + 1 : 1;
+
+        return $prefix.str_pad((string) $next, 6, '0', STR_PAD_LEFT);
+    }
 }
