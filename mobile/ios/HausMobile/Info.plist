@@ -35,6 +35,10 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamera se koristi za fotografisanje kvara i slika prije i poslije rada.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Galerija se koristi za izbor fotografije kvara.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

@@ -29,22 +29,10 @@ import Button from '../../components/Button';
 import { useAuthStore } from '../../store/auth';
 import { useRegistrationStore } from '../../store/registration';
 import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { formatDate } from '../../utils/format';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-
-function formatDate(iso: string | null): string | null {
-  if (!iso) {
-    return null;
-  }
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  return `${dd}.${mm}.${date.getFullYear()}.`;
-}
 
 export function PretplataAktivnaScreen() {
   const navigation = useNavigation<Nav>();
@@ -90,6 +78,22 @@ export function PretplataAktivnaScreen() {
       chip: 'Zahtjev poslan',
       headline: 'Vaš zahtjev ide\ndispečeru.',
       body: 'Za 10 i više stanova pripremamo poseban dogovor. Dispečer će Vas kontaktirati kroz aplikaciju.',
+      planeEmber: false,
+    },
+    // "istekla"/"otkazana" se ne mogu desiti na svježoj registraciji, ali su
+    // dio SubscriptionStatus tipa (enum SubscriptionStatus.php ima 5
+    // vrijednosti): ovaj ekran sada može i njih dobiti nakon simulacije
+    // plaćanja (KarticaInfoScreen refetch-uje /me i piše stvarni status).
+    istekla: {
+      chip: 'Pretplata je istekla',
+      headline: 'Vaša pretplata\nje istekla.',
+      body: 'Obnovite pretplatu da biste prijavili kvar.',
+      planeEmber: false,
+    },
+    otkazana: {
+      chip: 'Pretplata je otkazana',
+      headline: 'Vaša pretplata\nje otkazana.',
+      body: 'Obnovite pretplatu da biste prijavili kvar.',
       planeEmber: false,
     },
   }[status];

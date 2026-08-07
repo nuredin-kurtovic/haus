@@ -19,6 +19,22 @@ export const API_BASE_URL = Platform.select({
   default: 'http://localhost:8000/api/v1',
 });
 
+/**
+ * Slike naloga (JobPhoto.url) dolaze sa servera kao apsolutni URL izgrađen
+ * iz APP_URL (`http://localhost:8000/storage/...`, web/.env, potvrđeno
+ * čitanjem JobPhoto::url() i config/app.php). To je Mac-hostova adresa:
+ * ispravna na iOS simulatoru (deli localhost sa hostom), ali na Android
+ * emulatoru mora ići na 10.0.2.2 kao i API_BASE_URL. Server ne zna koja
+ * platforma zove, pa mobile klijent mora sam remapirati host, istom
+ * logikom kao API_BASE_URL iznad.
+ */
+export function resolveMediaUrl(url: string): string {
+  if (Platform.OS !== 'android') {
+    return url;
+  }
+  return url.replace('://localhost:', '://10.0.2.2:').replace('://127.0.0.1:', '://10.0.2.2:');
+}
+
 const KEYCHAIN_SERVICE = 'haus.auth.token';
 const KEYCHAIN_USERNAME = 'haus';
 
@@ -80,6 +96,14 @@ interface RequestOptions {
   skipAuth?: boolean;
   /** Za multipart/form-data upload (fotografije). */
   formData?: FormData;
+  /**
+   * Koristi OVAJ token umjesto onog iz keychain-a. Treba za GET /me
+   * odmah nakon POST /auth/register/fake-payment, PRIJE nego što
+   * korisnik potvrdi ulazak u aplikaciju (commitSession, ekran 07):
+   * dotad token nije upisan u keychain, pa ga get() ne bi imao odakle
+   * pročitati (vidi KarticaInfoScreen.tsx).
+   */
+  tokenOverride?: string;
 }
 
 async function request<T>(
@@ -95,7 +119,7 @@ async function request<T>(
   };
 
   if (!options?.skipAuth) {
-    const token = await getToken();
+    const token = options?.tokenOverride ?? (await getToken());
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
@@ -140,8 +164,12 @@ async function request<T>(
   return payload as T;
 }
 
-export function get<T>(path: string, query?: QueryParams): Promise<T> {
-  return request<T>('GET', path, undefined, { query });
+export function get<T>(
+  path: string,
+  query?: QueryParams,
+  options?: Omit<RequestOptions, 'query'>,
+): Promise<T> {
+  return request<T>('GET', path, undefined, { ...options, query });
 }
 
 export function post<T>(

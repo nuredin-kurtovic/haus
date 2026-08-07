@@ -1,13 +1,25 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 /**
- * Tipovi ruta za navigaciju. Klijent/dispečer tab ekrani su za sada
- * placeholderi (sljedeća faza gradi stvarne ekrane); onboarding, auth i
- * registracioni tok (ekrani 01-07) su implementirani.
+ * Tipovi ruta za navigaciju. Onboarding, auth, registracioni tok (01-07) i
+ * klijentski ekrani (08-15) su implementirani; dispečerski tabovi (16-19)
+ * su za sada placeholderi (sljedeća faza).
  *
  * PretplataAktivna nema route param za ishod: ekran čita stvarni
  * `subscription.status` iz registrationStore (setResult), umjesto da
  * navigacija pretpostavlja ishod po payment_method-u (lead review,
  * curl na živi server je pokazao da "kartica" trenutno ne aktivira
  * odmah, jer Monri webhook još ne postoji).
+ *
+ * Tri klijentska taba (Prijavi, Nalozi, Pretplata) su NIJESU više gole
+ * (undefined) rute: svaki je zaseban native-stack navigator ugniježđen u
+ * tabu (vidi navigation/PrijaviStack.tsx, NaloziStack.tsx,
+ * PretplataStack.tsx), da bi detalj/potvrda ekrani (10, 12, 14) mogli
+ * imati svoje '‹' back dugme i da tab bar ostane vidljiv na njima
+ * (React Navigation default: ugniježđen stack ne skriva roditeljski tab
+ * bar sam od sebe). `NavigatorScreenParams` omogućava cross-tab navigaciju
+ * direktno na ugniježđeni ekran, npr. sa Početne na konkretan nalog:
+ * `navigation.navigate('Nalozi', { screen: 'NalogDetalj', params: { jobId } })`.
  */
 export type RootStackParamList = {
   // Onboarding
@@ -27,11 +39,38 @@ export type RootStackParamList = {
   DispatcherTabs: undefined;
 };
 
+/** Ekrani 09 (koraci) i 10 (potvrda), ugniježđeni u tabu Prijavi. */
+export type PrijaviStackParamList = {
+  PrijaviKvar: undefined;
+  PrijavaPrimljena: {
+    jobId: number;
+    number: string;
+    deadlineAt: string;
+    category: string;
+    isEmergency: boolean;
+    preferredWindow: string;
+    remainingVisits: number;
+    totalVisits: number;
+  };
+};
+
+/** Ekrani 11 (lista) i 12 (detalj), ugniježđeni u tabu Nalozi. */
+export type NaloziStackParamList = {
+  NaloziList: undefined;
+  NalogDetalj: { jobId: number };
+};
+
+/** Ekran 13 (glavni) i 14 (cjenovnik), ugniježđeni u tabu Pretplata. */
+export type PretplataStackParamList = {
+  PretplataGlavna: undefined;
+  Cjenovnik: undefined;
+};
+
 export type ClientTabParamList = {
   Pocetna: undefined;
-  Prijavi: undefined;
-  Nalozi: undefined;
-  Pretplata: undefined;
+  Prijavi: NavigatorScreenParams<PrijaviStackParamList>;
+  Nalozi: NavigatorScreenParams<NaloziStackParamList>;
+  Pretplata: NavigatorScreenParams<PretplataStackParamList>;
   Profil: undefined;
 };
 
