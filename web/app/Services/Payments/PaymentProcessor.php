@@ -4,8 +4,10 @@ namespace App\Services\Payments;
 
 use App\Contracts\PaymentGateway;
 use App\Enums\InvoiceStatus;
+use App\Enums\InvoiceType;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
+use App\Exceptions\PaymentGatewayException;
 use App\Mail\RacunMail;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -14,6 +16,7 @@ use App\Models\Subscription;
 use App\Services\NotificationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
@@ -64,15 +67,8 @@ class PaymentProcessor
 
             $subscription = $invoice->subscription()->first();
 
-            if ($subscription instanceof Subscription && ! $subscription->isActive()) {
-                $starts = Carbon::now();
-
-                $subscription->update([
-                    'status' => SubscriptionStatus::Aktivna,
-                    'starts_at' => $starts,
-                    'ends_at' => $starts->copy()->addYear(),
-                    'price_paid' => $invoice->total,
-                ]);
+            if ($subscription instanceof Subscription) {
+                $this->knjiziPeriod($subscription, $invoice);
             }
 
             $this->spremiToken($invoice->user_id, $payload);
@@ -143,7 +139,20 @@ class PaymentProcessor
             ]);
         }
 
-        if (! $this->gateway->refund($payment, $iznos)) {
+        try {
+            $prosao = $this->gateway->refund($payment, $iznos);
+        } catch (PaymentGatewayException $e) {
+            Log::error('Povrat nije mogao doci do gatewaya.', [
+                'invoice' => $invoice->number,
+                'poruka' => $e->getMessage(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'invoice' => 'Gateway trenutno nije dostupan. Pokušajte ponovo za nekoliko minuta.',
+            ]);
+        }
+
+        if (! $prosao) {
             throw ValidationException::withMessages([
                 'invoice' => 'Gateway je odbio povrat.',
             ]);
@@ -159,6 +168,71 @@ class PaymentProcessor
         ]);
 
         return $invoice->refresh();
+    }
+
+    /**
+     * Postavi ili produzi period pretplate po uplacenoj fakturi.
+     *
+     * Prva uplata pocinje danas. Uplata obnove nastavlja na stari kraj, pa
+     * klijent ne gubi dane dok uplata putuje, i resetuje prava po adresama.
+     * Isti kod vrijedi i za MIT naplatu i za uplatnicu placenu poslije isteka.
+     */
+    private function knjiziPeriod(Subscription $subscription, Invoice $invoice): void
+    {
+        // Rok pretplate mijenja samo faktura pretplate. Faktura za rad ne dira rok.
+        if ($invoice->type !== InvoiceType::Pretplata) {
+            return;
+        }
+
+        // Aktivna pretplata kojoj rok jos traje nema sta da produzava.
+        if ($subscription->isActive() && $subscription->ends_at?->isFuture()) {
+            return;
+        }
+
+        $obnova = $subscription->ends_at !== null;
+        $starts = $obnova ? $this->pocetakObnove($subscription) : Carbon::now();
+
+        $subscription->update([
+            'status' => SubscriptionStatus::Aktivna,
+            'starts_at' => $starts,
+            'ends_at' => $starts->copy()->addYear(),
+            'price_paid' => $invoice->total,
+            // Novi period, novi podsjetnik 60 dana prije sljedeceg isteka.
+            'renewal_reminder_sent_at' => null,
+        ]);
+
+        if ($obnova) {
+            $this->resetujPrava($subscription);
+        }
+    }
+
+    /**
+     * Obnova nastavlja tamo gdje je stari period stao. Ako je uplata kasnila
+     * vise od godinu dana, stari kraj vise nema smisla i period pocinje danas.
+     */
+    private function pocetakObnove(Subscription $subscription): Carbon
+    {
+        $stariKraj = Carbon::instance($subscription->ends_at);
+
+        return $stariKraj->copy()->addYear()->isPast() ? Carbon::now() : $stariKraj;
+    }
+
+    /**
+     * Novi period vraca brojace izlazaka i pregleda na ono sto paket daje.
+     * Krediti (besplatne intervencije) su obecanje koje smo vec dali, ostaju.
+     */
+    private function resetujPrava(Subscription $subscription): void
+    {
+        $package = $subscription->package()->first();
+
+        if (! $package) {
+            return;
+        }
+
+        $subscription->properties()->update([
+            'remaining_visits' => (int) $package->visits_per_year,
+            'remaining_inspections' => (int) $package->inspections_per_year,
+        ]);
     }
 
     /**

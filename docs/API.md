@@ -11,9 +11,9 @@ Base: `/api/v1`. JSON. Auth: `Authorization: Bearer <sanctum token>`. Sve cijene
 | GET | `/price-list?q=&category=` | Objavljeni cjenovnik: kategorije > pozicije. Svaka pozicija: `{id, name, base_price, prices: {mini: n, plus: n, pro: n}}` (izračunato). |
 | GET | `/surcharges` | Doplate `{key, label, type: percent|per_km|flat, value}`. |
 | GET | `/settings/public` | Radno vrijeme, satnice, verzija cjenovnika. |
-| POST | `/auth/register` | Body: `{package_id, name, email, password, payment_method: uplatnica|kartica, properties: [{city_id, street, use?, contact_name?, contact_note?}]}`. Mini/Plus šalju tačno 1 property. Pro 2+; 10+ vraća `{status: ponuda}`. Odgovor 201: `{status, user, subscription, token, invoice?, payment?: {redirect_url}}`. `invoice` izostaje kod ponude, `payment` samo za karticu. |
+| POST | `/auth/register` | Body: `{package_id, name, email, password, payment_method: uplatnica|kartica, properties: [{city_id, street, use?, contact_name?, contact_note?}]}`. Mini/Plus šalju tačno 1 property. Pro 2+; 10+ vraća `{status: ponuda}`. Odgovor 201: `{status, user, subscription, token, invoice?, payment?: {redirect_url, method, fields}}`. `invoice` izostaje kod ponude, `payment` samo za karticu. |
 | POST | `/auth/login` | `{email, password}` > `{user, token, role}`. Pogrešni kredencijali: 422 na `errors.email`. |
-| POST | `/webhooks/monri` | Monri status webhook (signature verified, ne Bearer). Body `{reference, status: approved|declined, masked_pan?, token?}`. Aktivira pretplatu / knjiži uplatu mašinski, idempotentno. Loš potpis: 403. |
+| POST | `/webhooks/monri` | Status webhook gatewaya (signature verified, ne Bearer). Polja zavise od drivera, vidi "Webhook gatewaya" niže. Aktivira ili produžava pretplatu i knjiži uplatu mašinski, idempotentno. Loš potpis: 403. |
 
 ### Detalji registracije
 
@@ -21,7 +21,23 @@ Base: `/api/v1`. JSON. Auth: `Authorization: Bearer <sanctum token>`. Sve cijene
 - `subscription` nosi `{id, status, package: {id, name, slug, is_per_apartment}, starts_at, ends_at, auto_renew, price, price_paid, free_interventions, remaining_visits, remaining_inspections, properties[]}`. `price` je izračunata godišnja cijena (Pro: cijena po stanu x broj stanova uz tier popust). `starts_at` i `ends_at` su `null` dok uplata ne legne.
 - `token` stiže odmah, i dok pretplata čeka uplatu. Guard koji traži aktivnu pretplatu je na `/client` rutama.
 - Uplatnica: server šalje mejl sa iznosom i pozivom na broj, bez `payment` objekta u odgovoru.
-- Kartica: `payment.redirect_url` vodi na 3DS. Lokalno FakeGateway vodi na `/placanje/simulacija?ref={reference}`.
+- Kartica: `payment.method` kaže kako otvoriti 3DS.
+  - `GET` (FakeGateway lokalno): `payment.fields` je prazan, klijent samo ide na `payment.redirect_url`, tj. `/placanje/simulacija?ref={reference}`.
+  - `POST` (Monri WebPay): klijent renderuje skrivenu formu na `payment.redirect_url` sa svim parovima iz `payment.fields` kao hidden inputima i odmah je submituje. Polja se ne mijenjaju, ne filtriraju i ne dopunjuju: `digest` je potpisan nad iznosom i brojem narudžbe. Nijedno polje nije tajna, ključ trgovca nikad ne napušta server.
+
+### Webhook gatewaya
+
+Ruta je ista za oba drivera, ulazna polja nisu. Server ih svede na zajednički oblik prije knjiženja.
+
+| Driver | Potpis | Body |
+|---|---|---|
+| `fake` | zaglavlje `X-Fake-Signature` = `sha256(sirovo tijelo + tajna)` | `{reference, status: approved\|declined, masked_pan?, token?}` |
+| `monri` | zaglavlje `Authorization: WP3-callback {digest} {timestamp}`, gdje je digest `sha512(key + timestamp + sirovo tijelo)`; alternativno polje `digest` u tijelu | `{order_number, status, amount?, currency?, masked_pan?, pan_token?, ...}` |
+
+- Mapiranje Monri polja: `order_number` > referenca uplate (to je broj fakture), `pan_token` > token za MIT obnovu, `masked_pan` > maska kartice. Status `approved` je odobreno, **sve ostalo** (`declined`, `invalid`, `error`) je odbijeno.
+- Odgovor je isti za oba: `{status: uspjesan|neuspjesan, processed: bool}`. `processed: false` znači da je isti webhook već bio proknjižen.
+- Bez potpisa ili sa pogrešnim potpisom: 403, zahtjev ne dolazi ni do baze. Nepoznata referenca: 404. Nedostaje `order_number` (Monri) ili `reference` (fake): 422.
+- Ista ruta prima i uplatu obnove. Pretplata koja čeka obnovu je u stanju `istekla` sa nenaplaćenom fakturom tipa `pretplata`; uplata je vraća u `aktivna`, produžava period i resetuje brojače izlazaka. Detalji u docs/ARCHITECTURE.md, sekcija "Obnova pretplate".
 
 ## Auth zajedničko
 

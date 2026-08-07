@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Services\Payments\FakeGateway;
+use App\Services\Payments\MonriGateway;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
@@ -19,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
 
             return match ($driver) {
                 'fake' => new FakeGateway,
-                // Monri driver stize u fazi 6.
+                'monri' => new MonriGateway,
                 default => throw new InvalidArgumentException(
                     "Driver placanja [{$driver}] nije implementiran."
                 ),

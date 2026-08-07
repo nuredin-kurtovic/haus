@@ -4,10 +4,12 @@ namespace App\Services\Payments;
 
 use App\Contracts\PaymentGateway;
 use App\Contracts\PaymentInitiation;
+use App\Contracts\PaymentResult;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PaymentToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -83,6 +85,30 @@ class FakeGateway implements PaymentGateway
     }
 
     /**
+     * MIT naplata po tokenu. Lokalno uvijek prolazi, jer nema banke koja bi
+     * odbila. Testovi ishod okrecu kroz services.haus.fake_charge_outcome.
+     */
+    public function chargeToken(PaymentToken $token, Invoice $invoice): PaymentResult
+    {
+        $reference = 'FAKE-MIT-'.Str::uuid()->toString();
+
+        $payload = [
+            'reference' => $reference,
+            'gateway' => 'fake',
+            'masked_pan' => (string) $token->masked_pan,
+            // Token ostaje isti, obnova ga ne mijenja.
+            'token' => (string) $token->token,
+            'amount' => (float) $invoice->total,
+        ];
+
+        if ($this->ishod() !== 'approved') {
+            return PaymentResult::declined($reference, $payload + ['status' => 'declined']);
+        }
+
+        return PaymentResult::approved($reference, $payload + ['status' => 'approved']);
+    }
+
+    /**
      * Potpis kakav bi gateway poslao. Koriste ga testovi i stranica simulacije.
      */
     public function signPayload(string $payload): string
@@ -93,5 +119,10 @@ class FakeGateway implements PaymentGateway
     private function secret(): string
     {
         return (string) config('services.haus.fake_gateway_secret');
+    }
+
+    private function ishod(): string
+    {
+        return (string) config('services.haus.fake_charge_outcome', 'approved');
     }
 }

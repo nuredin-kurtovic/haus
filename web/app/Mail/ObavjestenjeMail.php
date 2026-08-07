@@ -17,6 +17,12 @@ class ObavjestenjeMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    /** Mejl je vazan, pa red pokusava tri puta. */
+    public int $tries = 3;
+
+    /** Razmak izmedju pokusaja: minuta, pa pet, pa petnaest. */
+    public array $backoff = [60, 300, 900];
+
     public function __construct(
         public string $body,
         public string $templateKey = '',

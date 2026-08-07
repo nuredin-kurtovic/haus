@@ -79,7 +79,13 @@ class AuthController extends Controller
         }
 
         if ($result->initiation) {
-            $payload['payment'] = ['redirect_url' => $result->initiation->redirectUrl];
+            // Fake gateway je obican redirect, Monri WebPay je POST forme sa
+            // skrivenim poljima. Klijent gleda method i salje sta dobije.
+            $payload['payment'] = [
+                'redirect_url' => $result->initiation->redirectUrl,
+                'method' => $result->initiation->method,
+                'fields' => $result->initiation->fields,
+            ];
         }
 
         return response()->json($payload, 201);

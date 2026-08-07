@@ -7,6 +7,39 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## HAUS: lokalno pokretanje
+
+Cetiri procesa, svaki u svom terminalu. Prva dva su dovoljna za klikanje po
+aplikaciji, druga dva trebaju cim se dodirne mejl, obavjestenje ili obnova.
+
+```bash
+cp .env.example .env && php artisan key:generate   # samo prvi put
+php artisan migrate:fresh --seed                   # baza haus, MySQL
+
+php artisan serve        # 1. API i SPA na http://127.0.0.1:8000
+npm run dev              # 2. Vite (node je iz nvm-a, vidi CLAUDE.md)
+php artisan queue:work   # 3. mejlovi i izvjestaji (queue je Redis)
+php artisan schedule:work # 4. rokovi, podsjetnici i obnove
+```
+
+Bez `queue:work` mejlovi ostaju u redu i nikad se ne posalju: racun, uplatnica,
+izvjestaj u 24 sata i sva obavjestenja idu kroz red. Mailable klase pokusavaju
+tri puta, sa razmakom od minute, pet i petnaest minuta.
+
+Bez `schedule:work` ne rade tri komande koje se inace vrte same:
+
+| Komanda | Kada | Sta radi |
+|---|---|---|
+| `haus:check-deadlines` | svake minute | Probijen rok: upise besplatnu intervenciju i javi klijentu. |
+| `haus:process-renewals` | svaki dan u 06:00 | Naplata obnove po spremljenoj kartici ili uplatnica. |
+| `haus:renewal-reminders` | svaki dan u 09:00 | Podsjetnik 60 dana prije isteka pretplate. |
+
+Svaka od njih se moze pokrenuti i rucno (`php artisan haus:check-deadlines`),
+sve tri su idempotentne. U produkciji ide jedan cron red koji svake minute zove
+`php artisan schedule:run`.
+
+Testovi: `php artisan test`. Formatiranje: `./vendor/bin/pint`.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
