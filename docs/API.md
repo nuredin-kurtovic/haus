@@ -58,4 +58,5 @@ Base: `/api/v1`. JSON. Auth: `Authorization: Bearer <sanctum token>`. Sve cijene
 - Broj naloga: `HAUS-{godina}-{redni:04d}`, generiše server.
 - State chip mapping (oba klijenta, iz design/README.md): novo=ink/white, zakazano=bark/ivory, u_toku=ember/ivory tekst, zavrseno=sand/ink, garancija=ink fill/ivory tekst.
 - Paginacija: Laravel standard `{data, links, meta}` na listama gdje treba.
-- Sve mutacije koje mijenjaju stanje naloga upisuju red u `notifications` (šta je poslano, kome, kojim kanalom).
+- Sve mutacije koje mijenjaju stanje naloga upisuju red u `notifications_log` (šta je poslano, kome, kojim kanalom). Tabela se zove `notifications_log` jer Laravel rezerviše `notifications`.
+- `prices` mapa u cjenovniku je keyed po slugu paketa bez prefiksa (`mini`, `plus`, `pro`); klijenti čitaju mapu dinamički, ne fiksna tri ključa. JSON brojevi mogu stići kao int ili float, bez strict type checka.
