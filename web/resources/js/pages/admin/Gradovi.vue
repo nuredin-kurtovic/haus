@@ -160,7 +160,8 @@ onBeforeUnmount(() => {
             <div ref="mapEl" style="width:100%;height:340px"></div>
           </div>
 
-          <table class="table-haus" style="border:1px solid var(--sand)">
+          <div class="admin-table-scroll">
+            <table class="table-haus" style="border:1px solid var(--sand)">
             <thead>
               <tr>
                 <th>Grad</th>
@@ -190,6 +191,7 @@ onBeforeUnmount(() => {
               </tr>
             </tbody>
           </table>
+          </div>
           <p style="margin-top:18px;font-size:14px;font-weight:400;color:var(--bark);max-width:760px;line-height:1.55">Aktivan grad se odmah pojavljuje u listi pri registraciji i na javnoj mapi. Grad u pripremi se vidi na mapi, ali se u njemu ne može pretplatiti.</p>
         </div>
 

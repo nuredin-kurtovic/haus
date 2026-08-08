@@ -58,12 +58,12 @@ const bezPretplateNote = computed(() => {
       <h1 class="page-h1" style="margin-bottom:20px">Cjenovnik</h1>
       <p class="lead" style="max-width:680px;margin-bottom:56px">Godišnje plaćanje, automatska obnova. Cijene su sa PDV-om. Popust ide na rad, nikad na materijal.</p>
 
-      <div v-if="packages.length" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch;margin-bottom:80px">
+      <div v-if="packages.length" class="grid-cols-3" style="gap:24px;align-items:stretch;margin-bottom:80px">
         <PackageCard v-for="pkg in packages" :key="pkg.id" :pkg="pkg" :recommended="pkg.slug === 'haus-plus'" title-size="26px" />
       </div>
 
       <h2 class="eyebrow" style="margin-bottom:24px">Uporedba paketa</h2>
-      <div v-if="packages.length" style="overflow-x:auto;margin-bottom:32px">
+      <div v-if="packages.length" class="table-scroll" style="margin-bottom:32px">
         <table class="table-haus">
           <thead>
             <tr>
@@ -90,7 +90,7 @@ const bezPretplateNote = computed(() => {
         </table>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+      <div class="grid-cols-2" style="gap:32px">
         <div v-if="volumeNote" style="border:1px solid var(--sand);background:var(--ivory);padding:28px">
           <h3 style="font-size:18px;font-weight:600;margin-bottom:12px">Više stanova na HAUS Pro</h3>
           <p class="num" style="font-size:15px;font-weight:400;line-height:1.55;color:var(--bark)">{{ volumeNote }}</p>
@@ -101,9 +101,23 @@ const bezPretplateNote = computed(() => {
         </div>
       </div>
 
-      <div style="border-top:1px solid var(--sand);margin-top:96px;padding-top:96px">
+      <div class="radova-wrap">
         <CjenovnikRadovaSekcija />
       </div>
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.radova-wrap {
+  border-top: 1px solid var(--sand);
+  margin-top: 96px;
+  padding-top: 96px;
+}
+@media (max-width: 768px) {
+  .radova-wrap { margin-top: 56px; padding-top: 56px; }
+}
+@media (max-width: 480px) {
+  .radova-wrap { margin-top: 40px; padding-top: 40px; }
+}
+</style>

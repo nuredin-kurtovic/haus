@@ -62,7 +62,7 @@ function posaljiUpit() {
   <PublicLayout>
     <div class="container section-narrow">
       <h1 class="page-h1" style="margin-bottom:56px">Kontakt</h1>
-      <div style="display:grid;grid-template-columns:1fr 440px;gap:80px;align-items:start">
+      <div class="kontakt-grid">
         <div>
           <div style="background:var(--ember);padding:32px;margin-bottom:40px;display:flex;gap:2px;align-items:stretch;flex-wrap:wrap">
             <div style="background:var(--ivory);padding:22px 26px;flex:1;min-width:220px">
@@ -74,8 +74,8 @@ function posaljiUpit() {
               <span style="font-size:22px;font-weight:700;color:var(--ivory);line-height:1.25">HAUS aplikacija<br>Hitno</span>
             </div>
           </div>
-          <dl style="display:grid;grid-template-columns:180px 1fr;gap:0;border-top:1px solid var(--ink)">
-            <div v-for="k in kontaktPodaci" :key="k.k" style="grid-column:1 / -1;display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--sand);padding:18px 0">
+          <dl class="kontakt-dl">
+            <div v-for="k in kontaktPodaci" :key="k.k" class="kontakt-dl-row">
               <dt style="font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--bark)">{{ k.k }}</dt>
               <dd class="num" style="margin:0;font-size:16px;font-weight:400;line-height:1.5">{{ k.v }}</dd>
             </div>
@@ -102,3 +102,31 @@ function posaljiUpit() {
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.kontakt-grid {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 80px;
+  align-items: start;
+}
+.kontakt-dl {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0;
+  border-top: 1px solid var(--ink);
+}
+.kontakt-dl-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  border-bottom: 1px solid var(--sand);
+  padding: 18px 0;
+}
+@media (max-width: 1024px) {
+  .kontakt-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+@media (max-width: 480px) {
+  .kontakt-dl-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 0; }
+}
+</style>

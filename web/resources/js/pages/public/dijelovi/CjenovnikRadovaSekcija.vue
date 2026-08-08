@@ -68,7 +68,7 @@ const pregledNota = computed(() => {
     <p class="lead" style="max-width:720px;margin-bottom:16px">Javan i isti za sve. Cijene su za rad, sa PDV-om. Materijal se naplaćuje odvojeno, po nabavnoj cijeni + 20%.</p>
     <p v-if="satnicaLinija" class="num" style="font-size:15px;font-weight:400;color:var(--bark);margin-bottom:48px">{{ satnicaLinija }}</p>
 
-    <div class="field" style="width:360px;margin-bottom:20px">
+    <div class="field cj-search" style="margin-bottom:20px">
       <label for="cj-q" class="field-label">Pretraga po poslu</label>
       <input id="cj-q" v-model="q" type="search" placeholder="npr. baterija, bojler, brava" style="height:48px;padding:0 14px;font-size:16px">
     </div>
@@ -92,7 +92,7 @@ const pregledNota = computed(() => {
 
     <section v-for="g in filteredCategories" :key="g.id" style="margin-bottom:48px">
       <h3 style="font-size:24px;font-weight:700;margin-bottom:14px">{{ g.name }}</h3>
-      <div style="overflow-x:auto">
+      <div class="table-scroll">
         <table class="table-haus">
           <thead>
             <tr>
@@ -148,3 +148,10 @@ const pregledNota = computed(() => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.cj-search { width: 360px; }
+@media (max-width: 480px) {
+  .cj-search { width: 100%; }
+}
+</style>

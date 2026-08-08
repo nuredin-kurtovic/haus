@@ -56,7 +56,8 @@ onMounted(load);
         </div>
       </div>
 
-      <table class="table-haus" style="border:1px solid var(--sand)">
+      <div class="admin-table-scroll">
+        <table class="table-haus" style="border:1px solid var(--sand)">
         <thead>
           <tr>
             <th>Klijent</th>
@@ -89,6 +90,7 @@ onMounted(load);
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   </AdminLayout>
 </template>

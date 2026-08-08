@@ -20,7 +20,7 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div style="min-height:100vh;background:var(--ivory);display:flex;justify-content:center;padding:88px 24px 96px">
+  <div class="prijava-wrap">
     <div style="width:100%;max-width:440px">
       <RouterLink to="/" style="display:block;margin-bottom:48px">
         <img :src="'/assets/logo-primary.svg'" alt="HAUS" width="152" height="33">
@@ -50,3 +50,16 @@ async function onSubmit() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.prijava-wrap {
+  min-height: 100vh;
+  background: var(--ivory);
+  display: flex;
+  justify-content: center;
+  padding: 88px 24px 96px;
+}
+@media (max-width: 480px) {
+  .prijava-wrap { padding: 56px 20px 56px; }
+}
+</style>

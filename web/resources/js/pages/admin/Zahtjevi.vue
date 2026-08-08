@@ -255,7 +255,8 @@ onMounted(async () => {
       </div>
 
       <div style="display:grid;gap:24px;align-items:start" :style="{ gridTemplateColumns: `1fr ${selectedId ? '420px' : '0px'}` }">
-        <table class="table-haus" style="border:1px solid var(--sand)">
+        <div class="admin-table-scroll">
+          <table class="table-haus" style="border:1px solid var(--sand)">
           <thead>
             <tr>
               <th>Broj</th>
@@ -294,6 +295,7 @@ onMounted(async () => {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <aside v-if="selectedId" class="detail-aside">
           <div v-if="loadingDetail || !selectedJob" class="detail-aside-body">Učitavanje...</div>

@@ -80,6 +80,8 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
+    <p class="admin-mobile-notice">Admin je namijenjen radu na računaru.</p>
+
     <main style="flex:1">
       <slot />
     </main>

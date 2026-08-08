@@ -71,7 +71,7 @@ function photoOfType(photos, type) {
 
 <template>
   <KlijentLayout>
-    <div style="width:1320px;max-width:100%;margin:0 auto;padding:56px 28px 96px">
+    <div class="klijent-shell">
       <h1 style="font-size:44px;font-weight:700;line-height:1.05;letter-spacing:-0.015em;margin-bottom:12px">Moje intervencije</h1>
       <p style="font-size:17px;font-weight:400;color:var(--bark);margin-bottom:40px">Svaka intervencija ima nalaz, fotografije prije i poslije, i datum do kojeg traje garancija.</p>
 
@@ -94,7 +94,7 @@ function photoOfType(photos, type) {
         <div style="display:flex;flex-direction:column;gap:24px">
           <article v-for="job in jobs" :key="job.id" :ref="(el) => setArticleRef(job.id, el)" style="border:1px solid var(--sand);background:var(--white)">
             <div
-              style="display:grid;grid-template-columns:1fr auto;gap:24px;padding:24px 28px;align-items:start"
+              class="job-head"
               :style="{ borderBottom: expanded[job.id] ? '1px solid var(--sand)' : '0', cursor: job.status === 'zavrseno' ? 'pointer' : 'default' }"
               @click="toggle(job)"
             >
@@ -108,7 +108,7 @@ function photoOfType(photos, type) {
                 <h2 style="font-size:22px;font-weight:600;line-height:1.3;margin-bottom:6px">{{ job.title }}</h2>
                 <p class="num" style="font-size:15px;font-weight:400;color:var(--bark)">Prijavljeno {{ formatDate(job.created_at) }} · Majstor {{ job.technician?.name || 'Nije dodijeljen' }}</p>
               </div>
-              <div style="text-align:right">
+              <div class="job-head-deadline">
                 <span style="display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--bark)">{{ garancijaInfo(job).label }}</span>
                 <span class="num" style="display:block;font-size:20px;font-weight:600">{{ garancijaInfo(job).value }}</span>
               </div>
@@ -117,8 +117,8 @@ function photoOfType(photos, type) {
             <div v-if="expanded[job.id]">
               <div v-if="details[job.id]?.loading" style="padding:24px 28px;color:var(--bark)">Učitavanje nalaza...</div>
               <p v-else-if="details[job.id]?.error" class="error-panel" style="margin:24px 28px">{{ details[job.id].error }}</p>
-              <div v-else-if="details[job.id]?.data" style="display:grid;grid-template-columns:1fr 240px 240px;gap:1px;background:var(--sand)">
-                <div style="background:var(--ivory);padding:24px 28px">
+              <div v-else-if="details[job.id]?.data" class="job-detail-grid">
+                <div class="job-detail-nalaz" style="background:var(--ivory);padding:24px 28px">
                   <h3 style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bark);margin-bottom:10px">Nalaz majstora</h3>
                   <p style="font-size:15px;font-weight:400;line-height:1.6;margin-bottom:16px">{{ details[job.id].data.findings || 'Nalaz još nije upisan.' }}</p>
                   <table v-if="details[job.id].data.invoice" style="width:100%">
@@ -139,11 +139,11 @@ function photoOfType(photos, type) {
                   </table>
                   <p v-else style="font-size:14px;font-weight:400;color:var(--bark)">Bez računa. Pokriveno izlaskom, kreditom ili garancijom.</p>
                 </div>
-                <div style="background:var(--white);height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                <div class="job-detail-photo job-detail-foto1">
                   <img v-if="photoOfType(details[job.id].data.photos, 'prije')" :src="photoOfType(details[job.id].data.photos, 'prije').url" alt="Fotografija prije" style="width:100%;height:100%;object-fit:cover">
                   <span v-else style="font-size:13px;font-weight:400;color:var(--bark);text-align:center;padding:0 16px">Nema fotografije prije</span>
                 </div>
-                <div style="background:var(--white);height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                <div class="job-detail-photo job-detail-foto2">
                   <img v-if="photoOfType(details[job.id].data.photos, 'poslije')" :src="photoOfType(details[job.id].data.photos, 'poslije').url" alt="Fotografija poslije" style="width:100%;height:100%;object-fit:cover">
                   <span v-else style="font-size:13px;font-weight:400;color:var(--bark);text-align:center;padding:0 16px">Nema fotografije poslije</span>
                 </div>
@@ -155,3 +155,49 @@ function photoOfType(photos, type) {
     </div>
   </KlijentLayout>
 </template>
+
+<style scoped>
+.job-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  padding: 24px 28px;
+  align-items: start;
+}
+.job-head-deadline {
+  text-align: right;
+}
+.job-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 240px 240px;
+  gap: 1px;
+  background: var(--sand);
+}
+.job-detail-photo {
+  background: var(--white);
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+@media (max-width: 1024px) {
+  .job-detail-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "nalaz nalaz" "foto1 foto2";
+  }
+  .job-detail-nalaz { grid-area: nalaz; }
+  .job-detail-foto1 { grid-area: foto1; }
+  .job-detail-foto2 { grid-area: foto2; }
+}
+@media (max-width: 640px) {
+  .job-head { grid-template-columns: 1fr; gap: 8px; }
+  .job-head-deadline { text-align: left; }
+}
+@media (max-width: 480px) {
+  .job-detail-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "nalaz" "foto1" "foto2";
+  }
+}
+</style>

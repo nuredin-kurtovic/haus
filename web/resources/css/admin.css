@@ -97,13 +97,46 @@
   letter-spacing: -0.01em;
 }
 
+/* Admin nije responsivan alat, ali tabele ne smiju gnječiti kolone ispod
+   1024px: kontejner scroluje horizontalno umjesto da lomi red. */
+.admin-table-scroll {
+  overflow-x: auto;
+}
+@media (max-width: 1024px) {
+  .admin-table-scroll > table { min-width: 720px; }
+}
+
+/* Diskretna napomena: admin je desktop alat. Vidljiva samo ispod 1024px. */
+.admin-mobile-notice {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .admin-mobile-notice {
+    display: block;
+    background: var(--ivory);
+    color: var(--ink);
+    border-bottom: 1px solid var(--sand);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 400;
+    text-align: center;
+  }
+}
+
 /* KPI hairline grid: uppercase label, 32px tabular value, 14px note */
 .kpi-grid {
   display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 1px;
   background: var(--sand);
   border: 1px solid var(--sand);
   margin-bottom: 32px;
+}
+@media (max-width: 1024px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .kpi-cell {
   background: var(--white);

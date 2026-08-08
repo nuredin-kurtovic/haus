@@ -100,7 +100,8 @@ onMounted(load);
         >{{ cat.name }}</button>
       </nav>
 
-      <table v-if="activeCategory" class="table-haus" style="border:1px solid var(--sand)">
+      <div class="admin-table-scroll">
+        <table v-if="activeCategory" class="table-haus" style="border:1px solid var(--sand)">
         <thead>
           <tr>
             <th>Pozicija</th>
@@ -132,6 +133,7 @@ onMounted(load);
           </tr>
         </tbody>
       </table>
+      </div>
 
       <p style="margin-top:18px;font-size:14px;font-weight:400;color:var(--bark);max-width:760px;line-height:1.55">Popust se računa iz cijene bez pretplate i ne uređuje se ručno. Objavljivanje mijenja cjenovnik na sajtu i na telefonima majstora u isto vrijeme, nikad samo na jednom mjestu.</p>
     </div>

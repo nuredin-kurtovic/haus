@@ -83,9 +83,25 @@ onMounted(async () => {
     map.invalidateSize();
     drawMarkers();
   }, 60);
+
+  window.addEventListener('resize', onWindowResize);
 });
 
+// Kontejner mijenja visinu na 768px media query (vidi <style> ispod): Leaflet
+// mora ponovo izmjeriti kontejner poslije promjene, inače ostaje kadar
+// izračunat na staroj visini. fitBounds/pinovi se ne diraju, samo veličina.
+let resizeTimer = null;
+function onWindowResize() {
+  if (!map) return;
+  window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => {
+    if (map) map.invalidateSize();
+  }, 120);
+}
+
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', onWindowResize);
+  window.clearTimeout(resizeTimer);
   if (map) {
     map.remove();
     map = null;
@@ -101,10 +117,10 @@ onBeforeUnmount(() => {
       <p v-if="uvod" class="lead num" style="max-width:760px;margin-bottom:40px">{{ uvod }}</p>
 
       <div style="border:1px solid var(--ink);margin-bottom:32px">
-        <div ref="mapEl" style="width:100%;height:640px"></div>
+        <div ref="mapEl" class="map-el"></div>
       </div>
 
-      <div v-if="cities.length" class="hairline-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:32px">
+      <div v-if="cities.length" class="hairline-grid grid-cols-3" style="margin-bottom:32px">
         <div v-for="c in cities" :key="c.id" style="background:var(--white);padding:28px 26px;min-height:170px">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px">
             <h2 style="font-size:24px;font-weight:700;line-height:1.2">{{ c.name }}</h2>
@@ -119,7 +135,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div style="background:var(--ember);padding:2px">
-        <div style="background:var(--ivory);padding:32px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center">
+        <div class="coverage-cta">
           <div>
             <h2 style="font-size:26px;font-weight:700;margin-bottom:8px">Nema vašeg grada?</h2>
             <p style="font-size:16px;font-weight:400;line-height:1.55;color:var(--bark);max-width:600px">Javite nam grad i adresu. Grad otvaramo kad na terenu imamo vlastite majstore koji mogu držati rok iz paketa. Javimo se prvi dan kad krenemo.</p>
@@ -139,5 +155,21 @@ onBeforeUnmount(() => {
 }
 :deep(.leaflet-container img) {
   max-width: none;
+}
+.map-el {
+  width: 100%;
+  height: 640px;
+}
+.coverage-cta {
+  background: var(--ivory);
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .map-el { height: 420px; }
+  .coverage-cta { grid-template-columns: 1fr; padding: 24px; }
 }
 </style>

@@ -21,7 +21,7 @@ function toggle(i) {
 
 <template>
   <PublicLayout>
-    <div class="container section-narrow" style="display:grid;grid-template-columns:1fr 380px;gap:80px;align-items:start">
+    <div class="container section-narrow faq-grid">
       <div>
         <h1 class="page-h1" style="margin-bottom:20px">Česta pitanja</h1>
         <p class="lead" style="margin-bottom:48px">Ovo su pitanja koja nam ljudi stvarno postavljaju. Odgovori su isti u aplikaciji i na vratima.</p>
@@ -36,7 +36,7 @@ function toggle(i) {
               <span :style="{ fontSize: '20px', fontWeight: open === i ? 600 : 400, lineHeight: 1.35 }">{{ f.q }}</span>
               <span style="font-size:22px;font-weight:600;color:var(--ember);line-height:1.2;flex:none">{{ open === i ? '–' : '+' }}</span>
             </button>
-            <p v-if="open === i" style="font-size:16px;font-weight:400;line-height:1.6;color:var(--bark);padding:0 60px 26px 0;max-width:640px">{{ f.a }}</p>
+            <p v-if="open === i" class="faq-answer">{{ f.a }}</p>
           </div>
         </div>
       </div>
@@ -48,3 +48,26 @@ function toggle(i) {
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 80px;
+  align-items: start;
+}
+.faq-answer {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--bark);
+  padding: 0 60px 26px 0;
+  max-width: 640px;
+}
+@media (max-width: 1024px) {
+  .faq-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+@media (max-width: 768px) {
+  .faq-answer { padding: 0 0 22px; max-width: none; }
+}
+</style>

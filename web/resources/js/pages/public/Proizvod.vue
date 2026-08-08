@@ -53,7 +53,7 @@ const nijeUkljuceno = [
       <p class="lead" style="max-width:720px;margin-bottom:72px">Platite jednom godišnje i imate jednu aplikaciju za vodu, struju, grijanje, klimu, stolariju i brave. Cijena se zna prije rada. Rok izlaska je garantovan.</p>
 
       <h2 class="eyebrow" style="margin-bottom:32px">Imenovani dijelovi usluge</h2>
-      <div class="hairline-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:96px">
+      <div class="hairline-grid grid-cols-3 dijelovi-grid" style="margin-bottom:96px">
         <div
           v-for="d in dijelovi"
           :key="d.t"
@@ -65,7 +65,7 @@ const nijeUkljuceno = [
       </div>
 
       <h2 class="eyebrow" style="margin-bottom:32px">Šta je uključeno u jednu intervenciju</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px">
+      <div class="grid-cols-2" style="gap:32px;margin-bottom:32px">
         <div style="border:1px solid var(--ink);padding:32px">
           <h3 style="font-size:26px;font-weight:700;margin-bottom:20px">Uključeno</h3>
           <ul style="display:flex;flex-direction:column;gap:12px">
@@ -87,7 +87,7 @@ const nijeUkljuceno = [
       </div>
       <p style="font-size:16px;font-weight:400;color:var(--bark);margin-bottom:96px;max-width:820px">Ovo pišemo unaprijed jer je devedeset posto sporova zato što ovo nije bilo napisano. Ako nešto nije uključeno, kažemo prije, ne poslije.</p>
 
-      <div style="background:var(--ember);padding:56px;display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:center">
+      <div class="hitno-band">
         <div>
           <h2 style="font-size:40px;font-weight:700;color:var(--ivory);line-height:1.1;margin-bottom:16px">HAUS Hitno</h2>
           <div v-if="hitnoRecenica" style="background:var(--ivory);padding:22px 26px">
@@ -104,3 +104,19 @@ const nijeUkljuceno = [
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.dijelovi-grid > div { min-height: 210px; }
+.hitno-band {
+  background: var(--ember);
+  padding: 56px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 56px;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .dijelovi-grid > div { min-height: 0; }
+  .hitno-band { grid-template-columns: 1fr; padding: 32px 24px; gap: 24px; }
+}
+</style>

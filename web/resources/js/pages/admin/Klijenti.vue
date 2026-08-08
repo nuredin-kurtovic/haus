@@ -50,7 +50,8 @@ onMounted(load);
         >
       </div>
 
-      <table class="table-haus" style="border:1px solid var(--sand)">
+      <div class="admin-table-scroll">
+        <table class="table-haus" style="border:1px solid var(--sand)">
         <thead>
           <tr>
             <th>Klijent</th>
@@ -84,6 +85,7 @@ onMounted(load);
           </tr>
         </tbody>
       </table>
+      </div>
 
       <div v-if="meta.last_page > 1" style="display:flex;align-items:center;gap:12px;margin-top:16px">
         <button type="button" class="row-action-btn muted" :disabled="page <= 1" @click="page -= 1">Prethodna</button>

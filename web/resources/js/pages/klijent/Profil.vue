@@ -88,7 +88,7 @@ async function submitAddressChange() {
 
 <template>
   <KlijentLayout>
-    <div style="max-width:900px;margin:0 auto;padding:56px 28px 96px">
+    <div class="klijent-shell-narrow">
       <h1 style="font-size:44px;font-weight:700;line-height:1.05;letter-spacing:-0.015em;margin-bottom:40px">Profil</h1>
 
       <div v-if="loading" style="padding:60px 0;text-align:center;color:var(--bark)">Učitavanje...</div>
@@ -104,7 +104,7 @@ async function submitAddressChange() {
         <section style="border:1px solid var(--sand);padding:32px;margin-bottom:24px">
           <h2 style="font-size:22px;font-weight:700;margin-bottom:20px">Adresa</h2>
           <div v-if="properties.length" style="display:flex;flex-direction:column;gap:1px;background:var(--sand);border:1px solid var(--sand)">
-            <div v-for="prop in properties" :key="prop.id" style="display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;background:var(--ivory);padding:20px 24px">
+            <div v-for="prop in properties" :key="prop.id" class="profil-prop-row">
               <div>
                 <span style="display:block;font-size:18px;font-weight:600;margin-bottom:4px">{{ prop.street }}, {{ prop.city }}</span>
                 <span style="display:block;font-size:14px;font-weight:400;color:var(--bark)">{{ propertyUseLabel(prop.use) }} · Pretplata je vezana za adresu i nije prenosiva.</span>
@@ -136,7 +136,7 @@ async function submitAddressChange() {
 
         <section style="border:1px solid var(--sand);padding:32px;margin-bottom:24px">
           <h2 style="font-size:22px;font-weight:700;margin-bottom:20px">Kontakt</h2>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="grid-cols-2" style="gap:20px">
             <div class="field">
               <label for="pr-ime" class="field-label">Ime i prezime</label>
               <input id="pr-ime" v-model="form.name" type="text" autocomplete="name">
@@ -180,3 +180,18 @@ async function submitAddressChange() {
     </div>
   </KlijentLayout>
 </template>
+
+<style scoped>
+.profil-prop-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+  background: var(--ivory);
+  padding: 20px 24px;
+}
+@media (max-width: 480px) {
+  .profil-prop-row { grid-template-columns: 1fr; }
+  .profil-prop-row button { width: 100%; }
+}
+</style>

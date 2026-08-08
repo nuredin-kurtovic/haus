@@ -386,8 +386,8 @@ const regUvod = computed(() => {
 
 <template>
   <div v-if="!loaded" style="min-height:100vh;background:var(--ivory)"></div>
-  <div v-else style="min-height:100vh;background:var(--ivory);display:grid;grid-template-columns:minmax(0,1fr) 420px">
-    <div style="display:flex;justify-content:center;padding:48px 56px 96px">
+  <div v-else class="reg-shell">
+    <div class="reg-main">
       <div style="width:100%;max-width:720px">
         <RouterLink to="/" style="display:block;margin-bottom:44px">
           <img :src="'/assets/logo-primary.svg'" alt="HAUS" width="152" height="33">
@@ -423,7 +423,7 @@ const regUvod = computed(() => {
           <form @submit.prevent="goToStep2">
             <fieldset style="border:0;padding:0;margin:0 0 36px">
               <legend class="field-label" style="margin-bottom:14px">Izaberite paket</legend>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+              <div class="pkg-tiles">
                 <label
                   v-for="pkg in packages"
                   :key="pkg.id"
@@ -448,7 +448,7 @@ const regUvod = computed(() => {
 
             <fieldset style="border:0;padding:0;margin:0 0 28px">
               <legend class="field-label" style="margin-bottom:14px">Vaši podaci</legend>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+              <div class="reg-2up" style="margin-bottom:20px">
                 <div class="field">
                   <label for="r-ime" class="field-label" style="font-size:13px">Ime i prezime</label>
                   <input id="r-ime" v-model="form.name" type="text" autocomplete="name" :class="{ 'field-error': errors.name }" @input="delete errors.name">
@@ -471,7 +471,7 @@ const regUvod = computed(() => {
             <!-- Adresa: Mini / Plus -->
             <fieldset v-if="!isPro" style="border:0;padding:0;margin:0 0 32px">
               <legend class="field-label" style="margin-bottom:14px">Adresa stana</legend>
-              <div style="display:grid;grid-template-columns:220px 1fr;gap:20px">
+              <div class="reg-addr-grid">
                 <div class="field">
                   <label for="r-grad" class="field-label" style="font-size:13px">Grad</label>
                   <select id="r-grad" v-model="form.city_id" :class="{ 'field-error': errors['properties.0.city_id'] }" @change="delete errors['properties.0.city_id']">
@@ -533,7 +533,7 @@ const regUvod = computed(() => {
                       @click="removeApartment(i)"
                     >Ukloni</button>
                   </div>
-                  <div style="display:grid;grid-template-columns:180px 1fr;gap:14px;margin-bottom:14px">
+                  <div class="reg-apt-grid" style="margin-bottom:14px">
                     <div class="field">
                       <label :for="'st-grad-' + i" class="field-label" style="font-size:13px">Grad</label>
                       <select :id="'st-grad-' + i" v-model="a.city_id" :class="{ 'field-error': errors[`properties.${i}.city_id`] }" @change="delete errors[`properties.${i}.city_id`]">
@@ -548,7 +548,7 @@ const regUvod = computed(() => {
                       <p v-if="errors[`properties.${i}.street`]" class="field-error-text">{{ errors[`properties.${i}.street`] }}</p>
                     </div>
                   </div>
-                  <div style="display:grid;grid-template-columns:180px 1fr;gap:14px;margin-bottom:14px">
+                  <div class="reg-apt-grid" style="margin-bottom:14px">
                     <div class="field">
                       <label :for="'st-tip-' + i" class="field-label" style="font-size:13px">Namjena</label>
                       <select :id="'st-tip-' + i" v-model="a.use">
@@ -645,7 +645,7 @@ const regUvod = computed(() => {
             <p style="font-size:17px;font-weight:400;line-height:1.55;color:var(--bark);margin-bottom:28px">
               Uplatnicu i račun šaljemo na <strong>{{ result.user.email }}</strong>. Pretplata radi od momenta kad uplata legne, obično isti ili sljedeći radni dan.
             </p>
-            <div class="hairline-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:32px">
+            <div class="hairline-grid grid-cols-3" style="margin-bottom:32px">
               <div style="background:var(--white);padding:18px 20px">
                 <span class="field-label" style="display:block;margin-bottom:8px">Broj fakture</span>
                 <span class="num" style="font-size:22px;font-weight:700">{{ result.invoice.number }}</span>
@@ -666,8 +666,8 @@ const regUvod = computed(() => {
       </div>
     </div>
 
-    <aside style="background:var(--ink)">
-      <div style="position:sticky;top:0;padding:48px 40px 44px;display:flex;flex-direction:column;gap:26px">
+    <aside class="reg-aside">
+      <div class="reg-aside-inner">
         <h2 class="eyebrow" style="color:var(--grey)">Vaša pretplata</h2>
         <div style="border-bottom:1px solid var(--bark);padding-bottom:22px">
           <span style="display:block;font-size:30px;font-weight:700;color:var(--ivory);letter-spacing:.04em;margin-bottom:6px">{{ asidePackageName }}</span>
@@ -692,3 +692,64 @@ const regUvod = computed(() => {
     </aside>
   </div>
 </template>
+
+<style scoped>
+.reg-shell {
+  min-height: 100vh;
+  background: var(--ivory);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+}
+.reg-main {
+  display: flex;
+  justify-content: center;
+  padding: 48px 56px 96px;
+}
+.reg-aside {
+  background: var(--ink);
+}
+.reg-aside-inner {
+  position: sticky;
+  top: 0;
+  padding: 48px 40px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.pkg-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.reg-2up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.reg-addr-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+}
+.reg-apt-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 14px;
+}
+@media (max-width: 1024px) {
+  .reg-shell { grid-template-columns: 1fr; }
+  .reg-aside-inner { position: static; top: auto; }
+}
+@media (max-width: 768px) {
+  .reg-main { padding: 24px 20px 56px; }
+  .reg-aside-inner { padding: 32px 20px; }
+}
+@media (max-width: 640px) {
+  .pkg-tiles { grid-template-columns: 1fr; }
+  .reg-2up { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .reg-addr-grid { grid-template-columns: 1fr; }
+  .reg-apt-grid { grid-template-columns: 1fr; }
+}
+</style>

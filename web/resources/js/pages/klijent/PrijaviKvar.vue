@@ -199,7 +199,7 @@ function resetForm() {
 
 <template>
   <KlijentLayout>
-    <div style="width:1320px;max-width:100%;margin:0 auto;padding:56px 28px 96px">
+    <div class="klijent-shell">
       <div v-if="loading" style="padding:80px 0;text-align:center;color:var(--bark)">Učitavanje...</div>
 
       <div v-else-if="loadError" class="error-panel" style="max-width:560px">
@@ -262,7 +262,7 @@ function resetForm() {
 
           <h2 style="font-size:26px;font-weight:600;margin-bottom:8px">Šta se pokvarilo?</h2>
           <p style="font-size:16px;font-weight:400;color:var(--bark);margin-bottom:24px">Ako ne znate kako se to zove, zadnja stavka je za to.</p>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:36px">
+          <div class="kat-tiles" style="margin-bottom:36px">
             <button
               v-for="opt in katOpcije"
               :key="opt.id"
@@ -319,7 +319,7 @@ function resetForm() {
         <div v-else>
           <h2 style="font-size:26px;font-weight:600;margin-bottom:8px">Kad vam odgovara?</h2>
           <p style="font-size:16px;font-weight:400;color:var(--bark);margin-bottom:24px">{{ rokTekst }} Termin je u prozoru od dva sata i potvrđujemo ga u aplikaciji.</p>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:32px">
+          <div class="termin-tiles" style="margin-bottom:32px">
             <button
               v-for="t in terminOpcije"
               :key="t.value"
@@ -353,3 +353,23 @@ function resetForm() {
     </div>
   </KlijentLayout>
 </template>
+
+<style scoped>
+.kat-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.termin-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (max-width: 768px) {
+  .kat-tiles { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .kat-tiles { grid-template-columns: 1fr; }
+  .termin-tiles { grid-template-columns: 1fr; }
+}
+</style>

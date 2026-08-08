@@ -80,7 +80,7 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
 
 <template>
   <KlijentLayout>
-    <div style="width:1320px;max-width:100%;margin:0 auto;padding:56px 28px 96px">
+    <div class="klijent-shell">
       <div v-if="!dashboard && loading" style="padding:80px 0;text-align:center;color:var(--bark)">Učitavanje...</div>
 
       <div v-else-if="!dashboard && error" class="error-panel" style="max-width:560px">
@@ -96,7 +96,7 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
           <p class="num" style="font-size:13px;font-weight:400;color:var(--bark)">{{ istekLinija }}</p>
         </div>
 
-        <div v-if="sub" class="hairline-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:32px">
+        <div v-if="sub" class="hairline-grid grid-cols-4" style="margin-bottom:32px">
           <div v-for="k in statusKartice" :key="k.k" style="background:var(--white);padding:26px 24px">
             <span style="display:block;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bark);margin-bottom:12px">{{ k.k }}</span>
             <span :class="{ num: k.num }" style="display:block;font-size:34px;font-weight:700;line-height:1.05;margin-bottom:6px">{{ k.v }}</span>
@@ -109,7 +109,7 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
           <RouterLink to="/cjenovnik" class="btn btn-ember">Pogledajte pakete</RouterLink>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 400px;gap:32px;align-items:start">
+        <div class="pocetna-grid">
           <div>
             <div v-if="dashboard.active_job" style="border:1px solid var(--ink);padding:26px;margin-bottom:32px">
               <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap">
@@ -126,7 +126,7 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
             </div>
 
             <div v-if="sub" style="background:var(--ember);padding:2px;margin-bottom:32px">
-              <div style="background:var(--ivory);padding:32px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center">
+              <div class="pokvarilo-cta">
                 <div>
                   <h2 style="font-size:28px;font-weight:700;margin-bottom:8px">Nešto se pokvarilo?</h2>
                   <p style="font-size:16px;font-weight:400;line-height:1.55;color:var(--bark);max-width:520px">{{ ctaTekst }}</p>
@@ -138,7 +138,7 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
             <AppPromo message="Brže je u aplikaciji." style="margin-bottom:32px" />
 
             <h2 style="font-size:15px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bark);margin-bottom:16px">Zadnje intervencije</h2>
-            <div v-if="(dashboard.recent_jobs || []).length" style="overflow-x:auto">
+            <div v-if="(dashboard.recent_jobs || []).length" class="table-scroll">
               <table class="table-haus" style="border:1px solid var(--sand)">
                 <thead>
                   <tr><th>Nalog</th><th>Šta</th><th>Prijavljeno</th><th>Stanje</th></tr>
@@ -181,3 +181,32 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
     </div>
   </KlijentLayout>
 </template>
+
+<style scoped>
+.pocetna-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+  align-items: start;
+}
+.pocetna-grid > * {
+  /* Bez ovoga tabela (table-scroll, min-width:640) naduva ovaj grid track
+     preko dostupne širine: overflow-x:auto je na potomku, ne na direktnom
+     grid itemu, pa se automatski minimum širine ne gasi bez ove linije. */
+  min-width: 0;
+}
+.pokvarilo-cta {
+  background: var(--ivory);
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+}
+@media (max-width: 1024px) {
+  .pocetna-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .pokvarilo-cta { grid-template-columns: 1fr; padding: 24px; }
+}
+</style>

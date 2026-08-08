@@ -79,7 +79,7 @@ onMounted(async () => {
       <p v-if="loading" style="font-size:15px;color:var(--bark)">Učitavanje...</p>
 
       <template v-else-if="dashboard">
-        <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi-grid">
           <div v-for="m in kpiRows(dashboard.kpi)" :key="m.key" class="kpi-cell">
             <span class="kpi-label">{{ m.label }}</span>
             <span class="kpi-value num">{{ m.value }}</span>
@@ -90,7 +90,8 @@ onMounted(async () => {
         <div style="display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:start">
           <div>
             <h2 class="detail-section-label">Danas: raspored</h2>
-            <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:36px">
+            <div class="admin-table-scroll">
+              <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:36px">
               <thead>
                 <tr>
                   <th>Prozor</th>
@@ -115,9 +116,11 @@ onMounted(async () => {
                 </tr>
               </tbody>
             </table>
+            </div>
 
             <h2 class="detail-section-label">Obnove uskoro</h2>
-            <table v-if="(dashboard.renewals_soon || []).length > 0" class="table-haus" style="border:1px solid var(--sand)">
+            <div v-if="(dashboard.renewals_soon || []).length > 0" class="admin-table-scroll">
+            <table class="table-haus" style="border:1px solid var(--sand)">
               <thead>
                 <tr>
                   <th>Klijent</th>
@@ -139,6 +142,7 @@ onMounted(async () => {
                 </tr>
               </tbody>
             </table>
+            </div>
             <div v-else class="empty-state">Nema pretplata koje ističu u sljedećih 60 dana.</div>
           </div>
 

@@ -7,14 +7,19 @@
   padding: 0 20px;
 }
 
+/* Sekcijske klase diraju SAMO vertikalni padding: cesto stoje na istom
+   elementu kao .container, pa shorthand (padding: 96px 0) gazi njegovih
+   horizontalnih 20px i tekst na mobilnom ide do ivice ekrana. */
 .section {
-  padding: 96px 0;
+  padding-top: 96px;
+  padding-bottom: 96px;
 }
 .section-top {
-  padding: 96px 0 0;
+  padding-top: 96px;
 }
 .section-narrow {
-  padding: 80px 0 96px;
+  padding-top: 80px;
+  padding-bottom: 96px;
 }
 
 /* Tipografija, po design/README.md */
@@ -127,6 +132,15 @@
   gap: 1px;
   background: var(--sand);
   border: 1px solid var(--sand);
+}
+
+/* Tabele koje ne smiju gnječiti kolone na uskom ekranu: kontejner scroluje,
+   tabela drži minimalnu širinu. */
+.table-scroll {
+  overflow-x: auto;
+}
+.table-scroll > table {
+  min-width: 640px;
 }
 
 /* Tabele */
@@ -269,4 +283,156 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Responsivni gridovi opšte namjene. Kombinuju se sa hairline-grid ili
+   koriste samostalno (display:grid dolazi odavde). Konkretni gap/align-items
+   ostaju inline po elementu, ne kose se sa ovim pravilima. */
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid-cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 1024px) {
+  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .grid-cols-2, .grid-cols-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .grid-cols-4 { grid-template-columns: 1fr; }
+}
+
+/* Tipografija, mobilni pad. Vrijednosti po design/README.md mobilnoj koloni. */
+@media (max-width: 1024px) {
+  .hero-h1 { font-size: 52px; }
+  .page-h1 { font-size: 48px; }
+  .section-h2 { font-size: 36px; }
+}
+@media (max-width: 768px) {
+  .hero-h1 { font-size: 40px; }
+  .page-h1 { font-size: 36px; }
+  .section-h2 { font-size: 30px; }
+  .hero-sub { font-size: 20px; }
+  .lead { font-size: 17px; }
+}
+
+/* Sekcijski padding, desktop 96px vertikalno. */
+@media (max-width: 768px) {
+  .section { padding-top: 56px; padding-bottom: 56px; }
+  .section-top { padding-top: 56px; }
+  .section-narrow { padding-top: 40px; padding-bottom: 56px; }
+}
+@media (max-width: 480px) {
+  .section { padding-top: 40px; padding-bottom: 40px; }
+  .section-top { padding-top: 40px; }
+  .section-narrow { padding-top: 32px; padding-bottom: 40px; }
+}
+
+/* Dugmad: touch cilj min 44px na dodirnim ekranima. */
+@media (max-width: 768px) {
+  .btn { min-height: 44px; }
+}
+
+/* Zajednički obrazac za "Meni" sklapanje navigacije, public i klijent header.
+   Desktop: nav-desktop vidljiv, nav-toggle i nav-panel skriveni.
+   Ispod 900px: nav-desktop nestaje, nav-toggle dugme se pojavljuje. */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 0 16px;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: none;
+}
+.nav-toggle-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: none;
+}
+.nav-toggle-bars span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--ink);
+}
+.brand-logo {
+  width: 176px;
+  height: auto;
+}
+.nav-panel {
+  display: none;
+  background: var(--ink);
+  border-top: 1px solid var(--bark);
+}
+.nav-panel.is-open {
+  display: block;
+}
+.nav-panel-list {
+  display: flex;
+  flex-direction: column;
+}
+.nav-panel-link {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ivory);
+  text-decoration: none;
+  border-bottom: 1px solid var(--bark);
+}
+.nav-panel-link.active {
+  font-weight: 600;
+}
+.nav-panel-extra {
+  padding: 16px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@media (max-width: 900px) {
+  .nav-desktop { display: none !important; }
+  .nav-toggle { display: inline-flex; }
+}
+@media (max-width: 480px) {
+  .brand-logo { width: 128px; }
+  .nav-toggle { padding: 0; width: 44px; }
+  .nav-toggle-label { display: none; }
+}
+
+/* Klijent stranice: zajednički sadržajni omotač, umjesto ponavljanog inline
+   width:1320px;padding:56px 28px 96px na svakoj stranici. */
+.klijent-shell {
+  width: 1320px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 56px 28px 96px;
+}
+.klijent-shell-narrow {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 56px 28px 96px;
+}
+@media (max-width: 768px) {
+  .klijent-shell, .klijent-shell-narrow { padding: 32px 20px 56px; }
+}
+@media (max-width: 480px) {
+  .klijent-shell, .klijent-shell-narrow { padding: 24px 16px 48px; }
 }

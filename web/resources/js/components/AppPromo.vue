@@ -40,7 +40,7 @@ function onBadgeClick(url) {
 
 <template>
   <section v-if="variant === 'band'" class="app-promo-band">
-    <div class="container" style="display:grid;grid-template-columns:1fr 420px;gap:64px;align-items:center">
+    <div class="container app-promo-grid">
       <div>
         <div style="display:inline-block;background:var(--ember);padding:2px;margin-bottom:24px">
           <span style="display:block;background:var(--ivory);color:var(--ink);padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">HAUS aplikacija</span>
@@ -111,6 +111,12 @@ function onBadgeClick(url) {
   background: var(--ink);
   padding: 96px 0;
 }
+.app-promo-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 64px;
+  align-items: center;
+}
 .store-badge-wrap {
   display: block;
   padding: 0;
@@ -122,5 +128,12 @@ function onBadgeClick(url) {
 }
 .store-badge-wrap:hover {
   opacity: .8;
+}
+@media (max-width: 768px) {
+  .app-promo-band { padding: 56px 0; }
+  .app-promo-grid { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width: 480px) {
+  .app-promo-band { padding: 40px 0; }
 }
 </style>

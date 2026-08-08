@@ -244,7 +244,8 @@ onMounted(async () => {
           <div style="background:var(--ivory);padding:20px 26px;border-bottom:1px solid var(--sand)">
             <h2 style="font-size:20px;font-weight:700">Doplate</h2>
           </div>
-          <table class="table-haus">
+          <div class="admin-table-scroll">
+            <table class="table-haus">
             <thead>
               <tr><th>Doplata</th><th class="num" style="text-align:right">Vrijednost</th><th>Tip</th><th>Aktivna</th></tr>
             </thead>
@@ -261,6 +262,7 @@ onMounted(async () => {
               </tr>
             </tbody>
           </table>
+          </div>
         </section>
 
         <section style="border:1px solid var(--sand);margin-bottom:24px;padding:26px">
@@ -293,7 +295,8 @@ onMounted(async () => {
           <div style="background:var(--ivory);padding:20px 26px;border-bottom:1px solid var(--sand)">
             <h2 style="font-size:20px;font-weight:700">Majstori</h2>
           </div>
-          <table class="table-haus">
+          <div class="admin-table-scroll">
+            <table class="table-haus">
             <thead>
               <tr><th>Ime</th><th>Zanat</th><th>Aktivan</th><th>Nalog</th><th class="num" style="text-align:right">Nalozi</th><th></th></tr>
             </thead>
@@ -314,6 +317,7 @@ onMounted(async () => {
               </tr>
             </tbody>
           </table>
+          </div>
           <form style="padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;border-top:1px solid var(--sand)" @submit.prevent="submitNewTech">
             <div class="field">
               <label class="field-label">Ime i prezime</label>

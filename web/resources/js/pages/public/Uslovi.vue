@@ -40,8 +40,8 @@ const sekcije = [
 
 <template>
   <PublicLayout>
-    <div class="container section-narrow" style="display:grid;grid-template-columns:260px 1fr;gap:80px;align-items:start">
-      <nav aria-label="Sadržaj" style="position:sticky;top:150px">
+    <div class="container section-narrow uslovi-grid">
+      <nav aria-label="Sadržaj" class="uslovi-toc">
         <h2 class="eyebrow" style="font-size:12px;margin-bottom:16px">Sadržaj</h2>
         <ul style="display:flex;flex-direction:column;gap:10px">
           <li v-for="s in sekcije" :key="s.n">
@@ -50,7 +50,7 @@ const sekcije = [
         </ul>
       </nav>
       <div style="max-width:720px">
-        <h1 style="font-size:52px;font-weight:700;line-height:1.08;letter-spacing:-0.02em;margin-bottom:12px">Uslovi korištenja</h1>
+        <h1 class="uslovi-h1">Uslovi korištenja</h1>
         <p class="num" style="font-size:14px;font-weight:400;color:var(--bark);margin-bottom:56px">Verzija 1.0 · na snazi od 01.09.2026.</p>
         <section v-for="s in sekcije" :key="s.n" :id="`u${s.n}`" style="margin-bottom:48px;scroll-margin-top:150px">
           <h2 style="font-size:26px;font-weight:700;line-height:1.2;margin-bottom:16px">{{ s.n }}. {{ s.t }}</h2>
@@ -60,3 +60,30 @@ const sekcije = [
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.uslovi-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.uslovi-toc {
+  position: sticky;
+  top: 150px;
+}
+.uslovi-h1 {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+@media (max-width: 1024px) {
+  .uslovi-grid { grid-template-columns: 1fr; gap: 32px; }
+  .uslovi-toc { position: static; top: auto; border-bottom: 1px solid var(--sand); padding-bottom: 24px; margin-bottom: 8px; }
+}
+@media (max-width: 480px) {
+  .uslovi-h1 { font-size: 34px; }
+}
+</style>

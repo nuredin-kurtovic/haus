@@ -58,29 +58,29 @@ onMounted(async () => {
 
 <template>
   <PublicLayout>
-    <section class="section-top container" style="display:grid;grid-template-columns:1fr 440px;gap:64px;align-items:end">
+    <section class="section-top container hero-grid">
       <div>
         <h1 class="hero-h1" style="margin-bottom:28px">Pukla cijev.<br>Nestalo struje.<br>Vrata se ne zatvaraju.</h1>
         <p class="hero-sub" style="max-width:520px;margin-bottom:40px">Ne tražite majstora. Ne pregovarate cijenu. Ne čekate cijeli dan.</p>
-        <div style="display:flex;gap:12px;margin-bottom:32px">
+        <div style="display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap">
           <RouterLink to="/cjenovnik" class="btn btn-ember">Pogledajte pakete</RouterLink>
           <RouterLink to="/cjenovnik#cjenovnik-radova" class="btn btn-ghost-ink">Cjenovnik radova</RouterLink>
         </div>
-        <p v-if="heroLinija" class="num" style="font-size:14px;font-weight:400;color:var(--bark);padding-bottom:80px">{{ heroLinija }}</p>
+        <p v-if="heroLinija" class="num hero-note" style="font-size:14px;font-weight:400;color:var(--bark)">{{ heroLinija }}</p>
       </div>
-      <div style="background:var(--white);display:flex;align-items:flex-end;justify-content:center;height:560px">
-        <img :src="'/assets/majstor.png'" alt="HAUS majstor" style="height:100%;width:auto;object-fit:contain;object-position:bottom;margin-bottom:-1px">
+      <div class="hero-image-wrap">
+        <img :src="'/assets/majstor.png'" alt="HAUS majstor" class="hero-image">
       </div>
     </section>
 
-    <section style="background:var(--ember);padding:72px 0">
-      <div class="container hairline-grid" style="grid-template-columns:repeat(3,1fr);background:transparent;border:0">
+    <section class="promise-band">
+      <div class="container hairline-grid grid-cols-3" style="background:transparent;border:0">
         <div v-for="o in obecanje" :key="o.t" style="background:var(--ivory);padding:36px 32px">
           <h3 style="font-size:26px;font-weight:700;line-height:1.15;margin-bottom:14px">{{ o.t }}</h3>
           <p style="font-size:15px;font-weight:400;color:var(--bark);line-height:1.55">{{ o.d }}</p>
         </div>
       </div>
-      <p class="container" style="margin-top:40px;font-size:34px;font-weight:600;color:var(--ivory);line-height:1.2">Jedna prijava. Poznata cijena. Dogovoren rok. Pisana garancija.</p>
+      <p class="container promise-master">Jedna prijava. Poznata cijena. Dogovoren rok. Pisana garancija.</p>
     </section>
 
     <AppPromo variant="band" />
@@ -90,14 +90,14 @@ onMounted(async () => {
         <h2 class="section-h2">Tri paketa. Godišnje plaćanje.</h2>
         <RouterLink to="/cjenovnik" style="font-size:15px;font-weight:600;text-decoration-thickness:2px">Detaljna uporedba</RouterLink>
       </div>
-      <div v-if="packages.length" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch">
+      <div v-if="packages.length" class="grid-cols-3" style="gap:24px;align-items:stretch">
         <PackageCard v-for="pkg in packages" :key="pkg.id" :pkg="pkg" :recommended="pkg.slug === 'haus-plus'" />
       </div>
     </section>
 
     <section class="container section">
       <h2 class="eyebrow" style="margin-bottom:40px">Šta pokrivamo</h2>
-      <div class="hairline-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="hairline-grid grid-cols-4">
         <div
           v-for="(u, i) in usluge"
           :key="u.t"
@@ -117,11 +117,11 @@ onMounted(async () => {
     </section>
 
     <section class="container" style="padding:0 20px 96px">
-      <div class="hairline-grid" style="grid-template-columns:1fr 1fr">
-        <div style="background:var(--white);height:420px;display:flex;align-items:center;justify-content:center;padding:32px">
+      <div class="hairline-grid grid-cols-2 beforeafter-grid">
+        <div class="beforeafter-photo">
           <p class="small-print" style="text-align:center;max-width:340px">Fotografija PRIJE: stvarna tabla sa osiguračima, prirodno svjetlo, bez blica</p>
         </div>
-        <div style="background:var(--white);height:420px;display:flex;align-items:center;justify-content:center;padding:32px">
+        <div class="beforeafter-photo">
           <p class="small-print" style="text-align:center;max-width:340px">Fotografija POSLIJE: isti kadar, ruke u radu, naljepnica HAUS Trag u tabli</p>
         </div>
         <div style="background:var(--ivory);padding:32px;grid-column:1 / -1">
@@ -130,10 +130,10 @@ onMounted(async () => {
       </div>
     </section>
 
-    <section style="background:var(--ink);padding:80px 0">
-      <div class="container" style="display:grid;grid-template-columns:1fr 420px;gap:80px;align-items:center">
+    <section class="closing-band">
+      <div class="container closing-grid">
         <div>
-          <p style="font-size:44px;font-weight:700;color:var(--ivory);line-height:1.1;letter-spacing:-0.015em;margin-bottom:16px">Vi živite. HAUS održava.</p>
+          <p style="font-size:44px;font-weight:700;color:var(--ivory);line-height:1.1;letter-spacing:-0.015em;margin-bottom:16px" class="closing-title">Vi živite. HAUS održava.</p>
           <p style="font-size:17px;font-weight:400;color:var(--sand);line-height:1.55;max-width:520px">{{ ctaLinija }}</p>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px">
@@ -144,3 +144,80 @@ onMounted(async () => {
     </section>
   </PublicLayout>
 </template>
+
+<style scoped>
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 64px;
+  align-items: end;
+}
+.hero-note { padding-bottom: 80px; }
+/* min-width: 0 nuli automatski minimum grid stavki: bez toga slika
+   (prirodno 701px) naduva kolonu preko viewporta na mobilnom. */
+.hero-grid > * {
+  min-width: 0;
+}
+.hero-image-wrap {
+  background: var(--white);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 560px;
+}
+.hero-image {
+  height: 100%;
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom;
+  margin-bottom: -1px;
+}
+.promise-band {
+  background: var(--ember);
+  padding: 72px 0;
+}
+.promise-master {
+  margin-top: 40px;
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--ivory);
+  line-height: 1.2;
+}
+.beforeafter-photo {
+  background: var(--white);
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+.closing-band {
+  background: var(--ink);
+  padding: 80px 0;
+}
+.closing-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 80px;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 32px; align-items: center; }
+  .hero-note { padding-bottom: 0; }
+  .hero-image-wrap { height: auto; max-height: 420px; order: 2; }
+  .hero-image { max-height: 420px; }
+  .closing-grid { grid-template-columns: 1fr; gap: 32px; text-align: left; }
+}
+@media (max-width: 768px) {
+  .promise-band { padding: 48px 0; }
+  .promise-master { font-size: 24px; margin-top: 28px; }
+  .beforeafter-photo { height: 260px; }
+  .closing-band { padding: 56px 0; }
+  .closing-title { font-size: 30px !important; }
+}
+@media (max-width: 480px) {
+  .beforeafter-photo { height: 200px; }
+}
+</style>

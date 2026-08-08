@@ -54,7 +54,8 @@ onMounted(load);
         <div v-else class="empty-state" style="margin-bottom:32px">Klijent nema upisanu pretplatu.</div>
 
         <h2 class="detail-section-label">Adrese</h2>
-        <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:32px">
+        <div class="admin-table-scroll">
+          <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:32px">
           <thead><tr><th>Grad</th><th>Ulica</th><th>Korištenje</th><th class="num" style="text-align:right">Preostali izlasci</th><th class="num" style="text-align:right">Preostali pregledi</th></tr></thead>
           <tbody>
             <tr v-if="detail.properties.length === 0"><td colspan="5" style="color:var(--bark)">Nema upisanih adresa.</td></tr>
@@ -67,9 +68,11 @@ onMounted(load);
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 class="detail-section-label">Nalozi</h2>
-        <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:32px">
+        <div class="admin-table-scroll">
+          <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:32px">
           <thead><tr><th>Broj</th><th>Kategorija</th><th>Stanje</th><th>Majstor</th><th>Prijavljen</th></tr></thead>
           <tbody>
             <tr v-if="detail.jobs.length === 0"><td colspan="5" style="color:var(--bark)">Klijent nema naloge.</td></tr>
@@ -82,9 +85,11 @@ onMounted(load);
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 class="detail-section-label">Fakture</h2>
-        <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:32px">
+        <div class="admin-table-scroll">
+          <table class="table-haus" style="border:1px solid var(--sand);margin-bottom:32px">
           <thead><tr><th>Broj</th><th>Tip</th><th>Stanje</th><th class="num" style="text-align:right">Ukupno</th><th>Plaćeno</th></tr></thead>
           <tbody>
             <tr v-if="detail.invoices.length === 0"><td colspan="5" style="color:var(--bark)">Nema faktura.</td></tr>
@@ -97,6 +102,7 @@ onMounted(load);
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 class="detail-section-label">HAUS Karton</h2>
         <div v-if="detail.home_records.length === 0" class="empty-state">Karton doma je prazan. Popunjava se automatski nakon svake intervencije.</div>

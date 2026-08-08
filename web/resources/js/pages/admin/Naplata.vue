@@ -114,7 +114,8 @@ onMounted(load);
         <input v-model="q" type="text" placeholder="Pretražite klijenta ili broj" style="border:1px solid var(--ink);background:var(--white);padding:11px 14px;font-size:15px;width:280px">
       </div>
 
-      <table class="table-haus" style="border:1px solid var(--sand)">
+      <div class="admin-table-scroll">
+        <table class="table-haus" style="border:1px solid var(--sand)">
         <thead>
           <tr>
             <th>Faktura</th>
@@ -158,6 +159,7 @@ onMounted(load);
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
 
     <div v-if="refundTarget" class="modal-overlay" @click.self="closeRefund">

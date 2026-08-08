@@ -46,7 +46,7 @@ const uvodTekst = computed(() => {
 
 <template>
   <KlijentLayout>
-    <div style="width:1320px;max-width:100%;margin:0 auto;padding:56px 28px 96px">
+    <div class="klijent-shell">
       <h1 style="font-size:44px;font-weight:700;line-height:1.05;letter-spacing:-0.015em;margin-bottom:12px">Cjenovnik</h1>
       <p style="font-size:17px;font-weight:400;color:var(--bark);line-height:1.55;margin-bottom:32px;max-width:720px">{{ uvodTekst }}</p>
 
@@ -60,7 +60,7 @@ const uvodTekst = computed(() => {
       <template v-else>
         <p v-if="error" class="error-panel" style="margin-bottom:24px">{{ error }} Prikazujemo zadnje učitane podatke.</p>
 
-        <div class="field" style="width:360px;margin-bottom:20px">
+        <div class="field cj-search" style="margin-bottom:20px">
           <label for="ck-q" class="field-label">Pretraga po poslu</label>
           <input id="ck-q" v-model="q" type="search" placeholder="npr. baterija, bojler, brava" style="height:48px;padding:0 14px;font-size:16px">
         </div>
@@ -79,7 +79,7 @@ const uvodTekst = computed(() => {
 
         <section v-for="g in filteredCategories" :key="g.id" style="margin-bottom:44px">
           <h2 style="font-size:22px;font-weight:700;margin-bottom:14px">{{ g.name }}</h2>
-          <div style="overflow-x:auto">
+          <div class="table-scroll">
             <table class="table-haus">
               <thead>
                 <tr>
@@ -108,3 +108,10 @@ const uvodTekst = computed(() => {
     </div>
   </KlijentLayout>
 </template>
+
+<style scoped>
+.cj-search { width: 360px; }
+@media (max-width: 480px) {
+  .cj-search { width: 100%; }
+}
+</style>

@@ -87,7 +87,7 @@ async function onCancel() {
 
 <template>
   <KlijentLayout>
-    <div style="width:1320px;max-width:100%;margin:0 auto;padding:56px 28px 96px">
+    <div class="klijent-shell">
       <h1 style="font-size:44px;font-weight:700;line-height:1.05;letter-spacing:-0.015em;margin-bottom:40px">Moja pretplata</h1>
 
       <div v-if="loading" style="padding:60px 0;text-align:center;color:var(--bark)">Učitavanje...</div>
@@ -103,7 +103,7 @@ async function onCancel() {
         <button type="button" class="btn btn-ghost-ink" @click="load">Pokušajte ponovo</button>
       </div>
 
-      <div v-else style="display:grid;grid-template-columns:1fr 400px;gap:48px;align-items:start">
+      <div v-else class="pretplata-grid">
         <div>
           <p v-if="error" class="error-panel" style="margin-bottom:24px">{{ error }} Prikazujemo zadnje učitane podatke.</p>
 
@@ -113,7 +113,7 @@ async function onCancel() {
               <span class="num" style="font-size:16px;font-weight:400;color:var(--sand)">{{ headerLinija }}</span>
             </div>
             <dl style="margin:0">
-              <div v-for="(r, i) in rows" :key="r.k" style="display:grid;grid-template-columns:280px 1fr" :style="{ background: i % 2 === 1 ? 'var(--zebra)' : 'var(--white)', borderBottom: '1px solid var(--sand)' }">
+              <div v-for="(r, i) in rows" :key="r.k" class="pretplata-dl-row" :style="{ background: i % 2 === 1 ? 'var(--zebra)' : 'var(--white)', borderBottom: '1px solid var(--sand)' }">
                 <dt style="padding:16px 28px;font-size:15px;font-weight:500">{{ r.k }}</dt>
                 <dd class="num" style="margin:0;padding:16px 28px;font-size:15px;font-weight:400;color:var(--bark)">{{ r.v }}</dd>
               </div>
@@ -121,7 +121,7 @@ async function onCancel() {
           </div>
 
           <h2 style="font-size:15px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bark);margin-bottom:16px">Historija plaćanja</h2>
-          <div v-if="(subscription.payments || []).length" style="overflow-x:auto">
+          <div v-if="(subscription.payments || []).length" class="table-scroll">
             <table class="table-haus" style="border:1px solid var(--sand)">
               <thead>
                 <tr><th>Broj</th><th>Tip</th><th class="num" style="text-align:right">Iznos</th><th>Stanje</th><th>Datum</th></tr>
@@ -165,3 +165,28 @@ async function onCancel() {
     </div>
   </KlijentLayout>
 </template>
+
+<style scoped>
+.pretplata-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 48px;
+  align-items: start;
+}
+.pretplata-grid > * {
+  /* Isti razlog kao u Pocetna.vue: tabela historije plaćanja (table-scroll)
+     je potomak, ne direktan grid item, pa treba ovo da spriječi naduvavanje. */
+  min-width: 0;
+}
+.pretplata-dl-row {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+@media (max-width: 1024px) {
+  .pretplata-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .pretplata-dl-row { grid-template-columns: 1fr; }
+  .pretplata-dl-row dd { padding-top: 0 !important; }
+}
+</style>
