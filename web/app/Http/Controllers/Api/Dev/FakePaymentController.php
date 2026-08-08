@@ -53,13 +53,14 @@ class FakePaymentController extends Controller
     }
 
     /**
-     * Ruta postoji samo uz lokalni gateway i upaljen debug. Provjera je u
-     * zahtjevu, a ne pri registraciji ruta, da testovi mogu mijenjati podesenja.
+     * Ruta postoji samo uz fake gateway (lokalno i staging). Fake gateway ne
+     * dira pravi novac, pa debug nije uslov: staging drzi APP_DEBUG=false.
+     * Provjera je u zahtjevu, a ne pri registraciji ruta, da testovi mogu
+     * mijenjati podesenja.
      */
     private function dostupno(): bool
     {
-        return config('services.haus.payment_gateway') === 'fake'
-            && (bool) config('app.debug') === true;
+        return config('services.haus.payment_gateway') === 'fake';
     }
 
     /**
