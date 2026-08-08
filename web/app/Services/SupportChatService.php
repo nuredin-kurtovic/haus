@@ -39,7 +39,7 @@ class SupportChatService
 
     /**
      * Odgovor modela na razgovor. Provider se bira u configu
-     * (services.support_ai.provider): anthropic ili openai.
+     * (services.support_ai.provider): anthropic, openai ili gemini.
      *
      * @param  array<int, array{role: string, content: string}>  $messages
      */
@@ -311,7 +311,7 @@ class SupportChatService
             }
 
             if ($opisi !== []) {
-                $redovi[] = "\nPopust na količinu stanova: ".implode('; ', $opisi).'.';
+                $redovi[] = "\nPopust na količinu stanova (važi SAMO za HAUS Pro): ".implode('; ', $opisi).'.';
                 $redovi[] = 'Za deset i više stanova nema automatske naplate. Registracija postaje zahtjev za ponudu.';
             }
         }
@@ -438,6 +438,10 @@ class SupportChatService
         Brojevi umjesto prideva: "72 sata", ne "brzo".
 
         Nikad ne koristite znak duge crte (em dash). Koristite tačku ili zarez.
+
+        Odgovarate čistim tekstom, bez markdown oznaka: bez zvjezdica,
+        bez naslova sa tarabom, bez lista sa crticom. Nabrajanja pišete
+        u rečenicama ili jedno po redu.
 
         Nikad ne izmišljate cijene, rokove, gradove ni uslove kojih nema u
         podacima iznad. Ako podatka nema, kažete da ne znate i uputite na
