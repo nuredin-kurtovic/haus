@@ -64,7 +64,7 @@ onMounted(async () => {
         <p class="hero-sub" style="max-width:520px;margin-bottom:40px">Ne tražite majstora. Ne pregovarate cijenu. Ne čekate cijeli dan.</p>
         <div style="display:flex;gap:12px;margin-bottom:32px">
           <RouterLink to="/cijene" class="btn btn-ember">Pogledajte pakete</RouterLink>
-          <RouterLink to="/cjenovnik" class="btn btn-ghost-ink">Cjenovnik radova</RouterLink>
+          <RouterLink to="/cijene#cjenovnik-radova" class="btn btn-ghost-ink">Cjenovnik radova</RouterLink>
         </div>
         <p v-if="heroLinija" class="num" style="font-size:14px;font-weight:400;color:var(--bark);padding-bottom:80px">{{ heroLinija }}</p>
       </div>

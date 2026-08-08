@@ -8,9 +8,9 @@ import AppPromo from '../components/AppPromo.vue';
 const route = useRoute();
 
 const navItems = [
+  { label: 'Početna', to: '/' },
   { label: 'Proizvod', to: '/proizvod' },
-  { label: 'Cijene', to: '/cijene' },
-  { label: 'Cjenovnik radova', to: '/cjenovnik' },
+  { label: 'Cijene i cjenovnik', to: '/cijene' },
   { label: 'Gdje radimo', to: '/gdje-radimo' },
   { label: 'Česta pitanja', to: '/pitanja' },
   { label: 'Kontakt', to: '/kontakt' },
@@ -22,7 +22,7 @@ const footerColumns = [
     linkovi: [
       { label: 'Proizvod', to: '/proizvod' },
       { label: 'Cijene', to: '/cijene' },
-      { label: 'Cjenovnik radova', to: '/cjenovnik' },
+      { label: 'Cjenovnik radova', to: '/cijene#cjenovnik-radova' },
       { label: 'Gdje radimo', to: '/gdje-radimo' },
       { label: 'Česta pitanja', to: '/pitanja' },
     ],

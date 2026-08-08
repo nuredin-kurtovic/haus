@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue';
 import PublicLayout from '../../layouts/PublicLayout.vue';
 import PackageCard from '../../components/PackageCard.vue';
+import CjenovnikRadovaSekcija from './dijelovi/CjenovnikRadovaSekcija.vue';
 import { fetchPackages, fetchSettings } from '../../api/catalog';
 import { sati, mjeseci } from '../../utils/format';
 
@@ -98,6 +99,10 @@ const bezPretplateNote = computed(() => {
           <h3 style="font-size:18px;font-weight:600;margin-bottom:12px">Bez pretplate</h3>
           <p class="num" style="font-size:15px;font-weight:400;line-height:1.55;color:var(--bark)">{{ bezPretplateNote }}</p>
         </div>
+      </div>
+
+      <div style="border-top:1px solid var(--sand);margin-top:96px;padding-top:96px">
+        <CjenovnikRadovaSekcija />
       </div>
     </div>
   </PublicLayout>

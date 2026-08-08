@@ -10,7 +10,9 @@ const routes = [
   { path: '/', name: 'naslovna', component: () => import('../pages/public/Naslovna.vue') },
   { path: '/proizvod', name: 'proizvod', component: () => import('../pages/public/Proizvod.vue') },
   { path: '/cijene', name: 'cijene', component: () => import('../pages/public/Cijene.vue') },
-  { path: '/cjenovnik', name: 'cjenovnik', component: () => import('../pages/public/Cjenovnik.vue') },
+  // Cjenovnik radova je sada podsekcija /cijene (sidro #cjenovnik-radova). Redirekt
+  // čuva stare linkove i bookmarke; ruta ne drži svoju komponentu.
+  { path: '/cjenovnik', redirect: { path: '/cijene', hash: '#cjenovnik-radova' } },
   { path: '/gdje-radimo', name: 'gdje-radimo', component: () => import('../pages/public/GdjeRadimo.vue') },
   { path: '/pitanja', name: 'pitanja', component: () => import('../pages/public/Pitanja.vue') },
   { path: '/kontakt', name: 'kontakt', component: () => import('../pages/public/Kontakt.vue') },
