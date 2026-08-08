@@ -124,7 +124,7 @@ class DevFakePaymentTest extends TestCase
         $this->assertSame(PaymentStatus::Iniciran, $payment->refresh()->status);
     }
 
-    public function test_ruta_ne_postoji_bez_debuga(): void
+    public function test_ruta_radi_i_bez_debuga_uz_fake_gateway(): void
     {
         $payment = $this->iniciranaUplata();
 
@@ -133,7 +133,7 @@ class DevFakePaymentTest extends TestCase
         $this->postJson('/api/v1/dev/fake-payment', [
             'reference' => $payment->gateway_reference,
             'outcome' => 'approved',
-        ])->assertStatus(404);
+        ])->assertOk();
     }
 
     public function test_nepoznata_referenca_vraca_404(): void
