@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { fetchCities } from '../api/catalog';
 import { nabrojiGradove } from '../utils/format';
+import AppPromo from '../components/AppPromo.vue';
 
 const route = useRoute();
 
@@ -95,7 +96,9 @@ function isActive(to) {
             <RouterLink to="/" style="display:block;margin-bottom:18px">
               <img :src="'/assets/logo-ivory.svg'" alt="HAUS" width="166" height="36">
             </RouterLink>
-            <p style="font-size:15px;font-weight:400;color:var(--sand);line-height:1.55;max-width:300px">{{ descriptor }}</p>
+            <p style="font-size:15px;font-weight:400;color:var(--sand);line-height:1.55;max-width:300px;margin-bottom:24px">{{ descriptor }}</p>
+            <h2 style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:16px">Aplikacija</h2>
+            <AppPromo variant="footer" />
           </div>
           <div v-for="col in footerColumns" :key="col.naslov">
             <h2 style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:16px">{{ col.naslov }}</h2>

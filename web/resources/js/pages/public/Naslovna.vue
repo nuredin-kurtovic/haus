@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue';
 import PublicLayout from '../../layouts/PublicLayout.vue';
 import PackageCard from '../../components/PackageCard.vue';
+import AppPromo from '../../components/AppPromo.vue';
 import { fetchPackages, fetchCities } from '../../api/catalog';
 import { nabrojiGradove } from '../../utils/format';
 
@@ -81,6 +82,8 @@ onMounted(async () => {
       </div>
       <p class="container" style="margin-top:40px;font-size:34px;font-weight:600;color:var(--ivory);line-height:1.2">Jedna prijava. Poznata cijena. Dogovoren rok. Pisana garancija.</p>
     </section>
+
+    <AppPromo variant="band" />
 
     <section class="container section-top">
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:40px;gap:24px;flex-wrap:wrap">

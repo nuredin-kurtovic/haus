@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { apiPost, ApiError } from '../../api/client';
+import AppPromo from '../../components/AppPromo.vue';
 
 // Lokalna simulacija Monri 3DS stranice (FakeGateway). Ne ide kroz PublicLayout,
 // stranica je namjerno izolovana jer imitira eksterni gateway.
@@ -73,7 +74,8 @@ function nazadNaPlacanje() {
           <p style="font-size:16px;font-weight:400;color:var(--sand);line-height:1.55;margin-bottom:24px">
             Prvu prijavu kvara možete poslati odmah, ne čekate ništa. Poznata cijena, dogovoren rok i pisana garancija idu od ovog trenutka. Račun je na mejlu.
           </p>
-          <RouterLink to="/klijent" class="btn btn-ember" style="padding:17px 26px;font-size:16px">U aplikaciju</RouterLink>
+          <RouterLink to="/klijent" class="btn btn-ember" style="padding:17px 26px;font-size:16px;margin-bottom:24px">U aplikaciju</RouterLink>
+          <AppPromo dark message="Prijava kvara ide kroz aplikaciju." />
         </div>
       </template>
 

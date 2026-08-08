@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { fetchCities, fetchPackages, fetchSettings } from '../../api/catalog';
 import { apiPost, ApiError } from '../../api/client';
 import { useAuthStore } from '../../stores/auth';
+import AppPromo from '../../components/AppPromo.vue';
 import {
   mjeseci,
   paketJedinicaGodisnje,
@@ -635,7 +636,8 @@ const regUvod = computed(() => {
               Prijava za <span class="num">{{ asideApartmentsCount }}</span> {{ stanWord(asideApartmentsCount) }} na paketu {{ asidePackageName }} ide dispečeru. Ponudu sa cijenom i rokom šaljemo na <strong>{{ result.user.email }}</strong> u najkraćem roku.
             </p>
             <p style="font-size:15px;font-weight:400;color:var(--bark);line-height:1.5;margin-bottom:32px">Prijavljeni ste odmah. Kad ponuda bude prihvaćena, pretplata se aktivira i vidjet ćete je u aplikaciji.</p>
-            <RouterLink to="/klijent" class="btn btn-ember" style="padding:18px 30px;font-size:17px">U aplikaciju</RouterLink>
+            <RouterLink to="/klijent" class="btn btn-ember" style="padding:18px 30px;font-size:17px;margin-bottom:28px">U aplikaciju</RouterLink>
+            <AppPromo message="Prijava kvara ide kroz aplikaciju." />
           </template>
           <template v-else>
             <span class="chip chip-ink" style="margin-bottom:20px">Uplatnica na mejl</span>
@@ -657,7 +659,8 @@ const regUvod = computed(() => {
                 <span class="num" style="font-size:22px;font-weight:700">{{ result.subscription.price }} KM</span>
               </div>
             </div>
-            <RouterLink to="/klijent" class="btn btn-ember" style="padding:18px 30px;font-size:17px">U aplikaciju</RouterLink>
+            <RouterLink to="/klijent" class="btn btn-ember" style="padding:18px 30px;font-size:17px;margin-bottom:28px">U aplikaciju</RouterLink>
+            <AppPromo message="Prijava kvara ide kroz aplikaciju." />
           </template>
         </div>
       </div>

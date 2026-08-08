@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import KlijentLayout from '../../layouts/KlijentLayout.vue';
 import StateChip from '../../components/StateChip.vue';
+import AppPromo from '../../components/AppPromo.vue';
 import { useAuthStore } from '../../stores/auth';
 import { fetchDashboard, fetchSubscription } from './api';
 import { formatDate, formatDateTime, jobChipState } from './format';
@@ -133,6 +134,8 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
                 <RouterLink to="/klijent/prijavi-kvar" class="btn btn-ember" style="padding:17px 26px;font-size:16px">Prijavite kvar</RouterLink>
               </div>
             </div>
+
+            <AppPromo message="Brže je u aplikaciji." style="margin-bottom:32px" />
 
             <h2 style="font-size:15px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bark);margin-bottom:16px">Zadnje intervencije</h2>
             <div v-if="(dashboard.recent_jobs || []).length" style="overflow-x:auto">

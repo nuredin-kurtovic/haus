@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import PublicLayout from '../../layouts/PublicLayout.vue';
+import AppPromo from '../../components/AppPromo.vue';
 import { fetchPackages } from '../../api/catalog';
 import { sati } from '../../utils/format';
 
@@ -98,6 +99,8 @@ const nijeUkljuceno = [
           <span style="display:block;font-size:26px;font-weight:700;color:var(--ivory);line-height:1.2">HAUS aplikacija<br>Hitno</span>
         </div>
       </div>
+
+      <AppPromo message="Hitne prijave idu kroz aplikaciju." style="margin-top:40px" />
     </div>
   </PublicLayout>
 </template>
