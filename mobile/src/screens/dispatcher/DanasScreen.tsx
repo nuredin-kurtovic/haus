@@ -16,15 +16,13 @@
  * reformatira se (CLAUDE.md: nikad ne izmišljati format koji server već
  * određuje).
  *
- * Logo: react-native-svg nije instaliran i nema rasterizovane ivory verzije
- * (samo logo-primary.png postoji, za light pozadine, vidi WelcomeScreen.tsx
- * napomenu); "HAUS" wordmark je ivory text kao pragmatična zamjena, isti
- * princip koji je već ustanovljen u prethodnoj fazi. Otvoreno pitanje,
- * dokumentovano u izvještaju.
+ * Logo: logo-ivory.png (rasterizovan iz design/logo-ivory.svg sa
+ * transparentnom pozadinom, @1x/2x/3x) za ink podloge; logo-primary.png
+ * za svijetle podloge. Native odnos 328x71.
  */
 
 import React from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
@@ -71,7 +69,12 @@ export function DanasScreen() {
     <View style={styles.container}>
       <View style={styles.inkHeader}>
         <View style={styles.inkTopRow}>
-          <Text style={styles.wordmark}>HAUS</Text>
+          <Image
+            source={require('../../../assets/images/logo-ivory.png')}
+            style={styles.wordmark}
+            resizeMode="contain"
+            accessibilityLabel="HAUS"
+          />
           <Text style={styles.dispatcherLabel}>Dispečer</Text>
         </View>
         <Text style={styles.headline}>Danas</Text>
@@ -177,10 +180,8 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   wordmark: {
-    fontFamily: fontFamily.bold,
-    fontSize: 17,
-    letterSpacing: 0.5,
-    color: colors.ivory,
+    width: 111,
+    height: 24,
   },
   dispatcherLabel: {
     ...typeScale.eyebrow,

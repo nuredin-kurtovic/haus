@@ -8,7 +8,7 @@ const faq = [
   { q: 'Imam ja svog majstora.', a: 'Odlično, zadržite ga. Pitanje je samo javlja li se u nedjelju u sedam i šta radite kad je na godišnjem. HAUS je tu za to.' },
   { q: 'Doći ćete i reći da treba veliki posao.', a: 'Nalaz dobijate napismeno, sa fotografijama i procjenom cijene. Nije obavezujući. Možete ga odnijeti kome hoćete. Mnogi to i urade.' },
   { q: 'Kako znam da nećete dići cijene?', a: 'Cjenovnik je javan i isti za sve. Cijena se kaže prije rada i vi je potvrđujete. Ako pozicija nije u cjenovniku, majstor zove kancelariju pred vama.' },
-  { q: 'Ne upisujem karticu na internet.', a: 'Ne morate. Uplatnicu šaljemo na mejl, platite je kako vam odgovara.' },
+  { q: 'Ne upisujem karticu na internet.', a: 'Ne morate. Platite uplatnicom koju pošaljemo na mejl.' },
   { q: 'Šta ako ne ispunite obećani rok?', a: 'Sljedeća intervencija je besplatna, automatski, bez da je tražite. Zato rokove postavljamo tako da ih možemo držati u sedmici prvog mraza, ne u prosječnoj sedmici.' },
 ];
 
