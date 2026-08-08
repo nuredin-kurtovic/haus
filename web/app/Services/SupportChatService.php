@@ -13,6 +13,8 @@ use App\Models\Package;
 use App\Models\PriceCategory;
 use App\Models\Surcharge;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use RuntimeException;
 
 /**
  * AI podrska na sajtu.
@@ -36,11 +38,85 @@ class SupportChatService
     public function __construct(private readonly SettingsService $settings) {}
 
     /**
-     * Odgovor modela na razgovor.
+     * Odgovor modela na razgovor. Provider se bira u configu
+     * (services.support_ai.provider): anthropic ili openai.
      *
      * @param  array<int, array{role: string, content: string}>  $messages
      */
     public function chat(array $messages): string
+    {
+        return match ((string) config('services.support_ai.provider', 'anthropic')) {
+            'openai' => $this->chatOpenAi($messages),
+            'gemini' => $this->chatGemini($messages),
+            default => $this->chatAnthropic($messages),
+        };
+    }
+
+    /**
+     * Google Gemini (generateContent) kroz Laravel Http klijent.
+     * Gemini koriste role user/model, pa se assistant mapira u model;
+     * sistemski prompt ide kroz system_instruction.
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function chatGemini(array $messages): string
+    {
+        $apiKey = (string) config('services.gemini.api_key');
+
+        if ($apiKey === '') {
+            throw SupportChatException::nijePodesen();
+        }
+
+        $model = (string) config('services.gemini.model');
+
+        $contents = array_map(fn (array $m): array => [
+            'role' => $m['role'] === 'assistant' ? 'model' : 'user',
+            'parts' => [['text' => $m['content']]],
+        ], $messages);
+
+        $response = Http::withHeaders(['x-goog-api-key' => $apiKey])
+            ->timeout(30)
+            ->connectTimeout(5)
+            ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", [
+                'system_instruction' => ['parts' => [['text' => $this->buildSystemPrompt()]]],
+                'contents' => $contents,
+                'generationConfig' => [
+                    'maxOutputTokens' => (int) config('services.gemini.max_tokens', 1024),
+                ],
+            ]);
+
+        if ($response->status() === 429) {
+            throw SupportChatException::preopterecen(new RuntimeException('Gemini 429: '.$response->body()));
+        }
+
+        if ($response->failed()) {
+            throw SupportChatException::apiGreska(new RuntimeException('Gemini '.$response->status().': '.$response->body()));
+        }
+
+        $tekst = '';
+
+        foreach ((array) $response->json('candidates.0.content.parts', []) as $part) {
+            $tekst .= $part['text'] ?? '';
+        }
+
+        $tekst = trim($tekst);
+
+        if ($tekst === '') {
+            throw SupportChatException::prazanOdgovor();
+        }
+
+        $this->zadnjaPotrosnja = [
+            'input_tokens' => (int) $response->json('usageMetadata.promptTokenCount', 0),
+            'output_tokens' => (int) $response->json('usageMetadata.candidatesTokenCount', 0),
+        ];
+
+        return $tekst;
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function chatAnthropic(array $messages): string
     {
         $apiKey = (string) config('services.anthropic.api_key');
 
@@ -82,6 +158,54 @@ class SupportChatService
         $this->zadnjaPotrosnja = [
             'input_tokens' => $message->usage->inputTokens,
             'output_tokens' => $message->usage->outputTokens,
+        ];
+
+        return $tekst;
+    }
+
+    /**
+     * OpenAI chat completions kroz Laravel Http klijent, bez dodatnog paketa.
+     * Sistemski prompt ide kao prva poruka sa role system.
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function chatOpenAi(array $messages): string
+    {
+        $apiKey = (string) config('services.openai.api_key');
+
+        if ($apiKey === '') {
+            throw SupportChatException::nijePodesen();
+        }
+
+        $response = Http::withToken($apiKey)
+            ->timeout(30)
+            ->connectTimeout(5)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => (string) config('services.openai.model'),
+                'max_completion_tokens' => (int) config('services.openai.max_tokens', 1024),
+                'messages' => [
+                    ['role' => 'system', 'content' => $this->buildSystemPrompt()],
+                    ...$messages,
+                ],
+            ]);
+
+        if ($response->status() === 429) {
+            throw SupportChatException::preopterecen(new RuntimeException('OpenAI 429: '.$response->body()));
+        }
+
+        if ($response->failed()) {
+            throw SupportChatException::apiGreska(new RuntimeException('OpenAI '.$response->status().': '.$response->body()));
+        }
+
+        $tekst = trim((string) $response->json('choices.0.message.content', ''));
+
+        if ($tekst === '') {
+            throw SupportChatException::prazanOdgovor();
+        }
+
+        $this->zadnjaPotrosnja = [
+            'input_tokens' => (int) $response->json('usage.prompt_tokens', 0),
+            'output_tokens' => (int) $response->json('usage.completion_tokens', 0),
         ];
 
         return $tekst;

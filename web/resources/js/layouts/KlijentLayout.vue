@@ -159,6 +159,8 @@ onMounted(async () => {
 }
 @media (max-width: 900px) {
   .k-header-inner { gap: 20px; height: 72px; padding: 0 20px; }
+  /* Desktop nav (flex: 1) je sakriven, pa akcije rucno idu uz desnu ivicu. */
+  .k-header-actions { margin-left: auto; }
 }
 @media (max-width: 480px) {
   .k-header-inner { gap: 10px; padding: 0 16px; }

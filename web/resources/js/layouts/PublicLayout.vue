@@ -198,6 +198,8 @@ function isActive(to) {
 }
 @media (max-width: 900px) {
   .site-header-inner { gap: 20px; height: 72px; }
+  /* Desktop nav (flex: 1) je sakriven, pa akcije rucno idu uz desnu ivicu. */
+  .site-header-actions { margin-left: auto; }
 }
 @media (max-width: 768px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 32px; }

@@ -71,6 +71,23 @@ return [
         'max_tokens' => 1024,
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_SUPPORT_MODEL', 'gpt-4o-mini'),
+        'max_tokens' => 1024,
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_SUPPORT_MODEL', 'gemini-2.5-flash'),
+        'max_tokens' => 1024,
+    ],
+
+    // AI podrska na sajtu: anthropic | openai | gemini.
+    'support_ai' => [
+        'provider' => env('SUPPORT_AI_PROVIDER', 'anthropic'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Monri Payments
