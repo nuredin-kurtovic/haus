@@ -60,25 +60,21 @@ const uvodTekst = computed(() => {
       <template v-else>
         <p v-if="error" class="error-panel" style="margin-bottom:24px">{{ error }} Prikazujemo zadnje učitane podatke.</p>
 
-        <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:24px;flex-wrap:wrap">
-          <div class="field" style="width:360px">
-            <label for="ck-q" class="field-label">Pretraga po poslu</label>
-            <input id="ck-q" v-model="q" type="search" placeholder="npr. baterija, bojler, brava">
-          </div>
-          <nav style="display:flex;gap:2px;flex-wrap:wrap" aria-label="Kategorije">
-            <button type="button" class="chip" :class="{ 'chip-ink': kat === 'Sve' }" style="cursor:pointer;font-weight:600" @click="kat = 'Sve'">Sve</button>
-            <button
-              v-for="c in categories"
-              :key="c.id"
-              type="button"
-              class="chip"
-              :class="{ 'chip-ink': kat === c.name }"
-              style="cursor:pointer"
-              :style="{ fontWeight: kat === c.name ? 600 : 400 }"
-              @click="kat = c.name"
-            >{{ c.name }}</button>
-          </nav>
+        <div class="field" style="width:360px;margin-bottom:20px">
+          <label for="ck-q" class="field-label">Pretraga po poslu</label>
+          <input id="ck-q" v-model="q" type="search" placeholder="npr. baterija, bojler, brava" style="height:48px;padding:0 14px;font-size:16px">
         </div>
+        <nav style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px" aria-label="Kategorije">
+          <button type="button" class="filter-chip" :class="{ 'filter-chip-active': kat === 'Sve' }" @click="kat = 'Sve'">Sve</button>
+          <button
+            v-for="c in categories"
+            :key="c.id"
+            type="button"
+            class="filter-chip"
+            :class="{ 'filter-chip-active': kat === c.name }"
+            @click="kat = c.name"
+          >{{ c.name }}</button>
+        </nav>
         <p class="num" style="font-size:14px;font-weight:400;color:var(--bark);margin-bottom:20px">{{ brojPozicija }} pozicija</p>
 
         <section v-for="g in filteredCategories" :key="g.id" style="margin-bottom:44px">

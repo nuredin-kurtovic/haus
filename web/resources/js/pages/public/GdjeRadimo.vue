@@ -46,12 +46,20 @@ function drawMarkers() {
 
   const valid = cities.value.filter((c) => typeof c.lat === 'number' && typeof c.lng === 'number');
   valid.forEach((city) => {
-    L.marker([city.lat, city.lng], { icon: pinIcon(city), keyboard: false, title: city.name }).addTo(markers);
+    // Aktivan grad (ember pin) mora biti iznad grada u pripremi kad se pinovi
+    // sudare na tijesnijem zumu, inače mu labela nestane iza susjedne.
+    const zIndexOffset = city.status === 'aktivan' ? 1000 : 0;
+    L.marker([city.lat, city.lng], { icon: pinIcon(city), keyboard: false, title: city.name, zIndexOffset }).addTo(markers);
   });
 
   if (valid.length > 0) {
     const bounds = L.latLngBounds(valid.map((c) => [c.lat, c.lng]));
-    map.fitBounds(bounds, { padding: [70, 90], maxZoom: 9 });
+    // Padding je manji od design/haus-map.js ([70,90]) i kontejner je viši
+    // (640px, ne 520px): BiH je uže-visoka nego što je ovaj sadržajni stub
+    // širok (1240px), pa ista vrijednost iz reference ovdje ostavlja pola
+    // Balkana u kadru jer visina, ne širina, ograničava zum. Ovim mjera
+    // stane u okvir na maxZoom 9 bez sječenja gradova.
+    map.fitBounds(bounds, { padding: [50, 30], maxZoom: 9 });
   }
 }
 
@@ -65,8 +73,16 @@ onMounted(async () => {
 
   cities.value = await fetchCities();
   await nextTick();
+  // invalidateSize prije fitBounds, radi sigurnosti: fitBounds računa zum na
+  // trenutnoj veličini kontejnera, pa ako se ona promijeni (layout, font),
+  // želimo da mjeri tačnu veličinu prije nego što računa kadar.
+  map.invalidateSize();
   drawMarkers();
-  window.setTimeout(() => map && map.invalidateSize(), 60);
+  window.setTimeout(() => {
+    if (!map) return;
+    map.invalidateSize();
+    drawMarkers();
+  }, 60);
 });
 
 onBeforeUnmount(() => {
@@ -85,7 +101,7 @@ onBeforeUnmount(() => {
       <p v-if="uvod" class="lead num" style="max-width:760px;margin-bottom:40px">{{ uvod }}</p>
 
       <div style="border:1px solid var(--ink);margin-bottom:32px">
-        <div ref="mapEl" style="width:100%;height:520px"></div>
+        <div ref="mapEl" style="width:100%;height:640px"></div>
       </div>
 
       <div v-if="cities.length" class="hairline-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:32px">
@@ -114,3 +130,14 @@ onBeforeUnmount(() => {
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+/* OSM pločice su šarene i tuku se sa brendom: smirene bojom, ember pinovi
+   ostaju puni ton pošto su izvan tile pane-a. Atribucija ostaje čitljiva. */
+:deep(.leaflet-tile-pane) {
+  filter: grayscale(1) contrast(1.05) brightness(1.02);
+}
+:deep(.leaflet-container img) {
+  max-width: none;
+}
+</style>

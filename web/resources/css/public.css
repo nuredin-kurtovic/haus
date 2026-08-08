@@ -191,6 +191,30 @@
   color: var(--ivory);
 }
 
+/* Filter dugmad kategorija (cjenovnik, javni i klijentski) */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 18px;
+  border: 1px solid var(--sand);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.filter-chip:hover {
+  border-color: var(--ink);
+}
+.filter-chip-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ivory);
+}
+
 /* Forme */
 .field {
   display: flex;

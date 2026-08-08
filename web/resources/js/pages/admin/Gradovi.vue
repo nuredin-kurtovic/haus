@@ -37,7 +37,9 @@ function drawMarkers() {
   markers = markers || L.layerGroup().addTo(map);
   const valid = cities.value.filter((c) => typeof c.lat === 'number' && typeof c.lng === 'number');
   valid.forEach((city) => {
-    L.marker([city.lat, city.lng], { icon: pinIcon(city), keyboard: false, title: city.name }).addTo(markers);
+    // Aktivan grad (ember pin) iznad grada u pripremi, isti razlog kao na javnoj mapi.
+    const zIndexOffset = city.status === 'aktivan' ? 1000 : 0;
+    L.marker([city.lat, city.lng], { icon: pinIcon(city), keyboard: false, title: city.name, zIndexOffset }).addTo(markers);
   });
   if (valid.length > 0) {
     const bounds = L.latLngBounds(valid.map((c) => [c.lat, c.lng]));
@@ -51,6 +53,7 @@ async function load() {
     const body = await fetchAdminCities();
     cities.value = body.data;
     await nextTick();
+    if (map) map.invalidateSize();
     drawMarkers();
   } finally {
     loading.value = false;
@@ -128,7 +131,11 @@ onMounted(async () => {
   }).addTo(map);
   map.setView([44.1, 17.7], 7);
   await load();
-  window.setTimeout(() => map && map.invalidateSize(), 60);
+  window.setTimeout(() => {
+    if (!map) return;
+    map.invalidateSize();
+    drawMarkers();
+  }, 60);
 });
 
 onBeforeUnmount(() => {
@@ -216,3 +223,13 @@ onBeforeUnmount(() => {
     </div>
   </AdminLayout>
 </template>
+
+<style scoped>
+/* Isti tretman kao na javnoj mapi (/gdje-radimo): smirene OSM pločice, ember pinovi ostaju puni ton. */
+:deep(.leaflet-tile-pane) {
+  filter: grayscale(1) contrast(1.05) brightness(1.02);
+}
+:deep(.leaflet-container img) {
+  max-width: none;
+}
+</style>

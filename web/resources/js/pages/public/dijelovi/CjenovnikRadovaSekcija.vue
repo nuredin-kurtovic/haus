@@ -68,31 +68,26 @@ const pregledNota = computed(() => {
     <p class="lead" style="max-width:720px;margin-bottom:16px">Javan i isti za sve. Cijene su za rad, sa PDV-om. Materijal se naplaćuje odvojeno, po nabavnoj cijeni + 20%.</p>
     <p v-if="satnicaLinija" class="num" style="font-size:15px;font-weight:400;color:var(--bark);margin-bottom:48px">{{ satnicaLinija }}</p>
 
-    <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:8px;flex-wrap:wrap">
-      <div class="field" style="width:360px">
-        <label for="cj-q" class="field-label">Pretraga po poslu</label>
-        <input id="cj-q" v-model="q" type="search" placeholder="npr. baterija, bojler, brava">
-      </div>
-      <nav style="display:flex;gap:2px;flex-wrap:wrap" aria-label="Kategorije">
-        <button
-          type="button"
-          class="chip"
-          :class="{ 'chip-ink': kat === 'Sve' }"
-          style="cursor:pointer;font-weight:600"
-          @click="kat = 'Sve'"
-        >Sve</button>
-        <button
-          v-for="c in categories"
-          :key="c.id"
-          type="button"
-          class="chip"
-          :class="{ 'chip-ink': kat === c.name }"
-          style="cursor:pointer"
-          :style="{ fontWeight: kat === c.name ? 600 : 400 }"
-          @click="kat = c.name"
-        >{{ c.name }}</button>
-      </nav>
+    <div class="field" style="width:360px;margin-bottom:20px">
+      <label for="cj-q" class="field-label">Pretraga po poslu</label>
+      <input id="cj-q" v-model="q" type="search" placeholder="npr. baterija, bojler, brava" style="height:48px;padding:0 14px;font-size:16px">
     </div>
+    <nav style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px" aria-label="Kategorije">
+      <button
+        type="button"
+        class="filter-chip"
+        :class="{ 'filter-chip-active': kat === 'Sve' }"
+        @click="kat = 'Sve'"
+      >Sve</button>
+      <button
+        v-for="c in categories"
+        :key="c.id"
+        type="button"
+        class="filter-chip"
+        :class="{ 'filter-chip-active': kat === c.name }"
+        @click="kat = c.name"
+      >{{ c.name }}</button>
+    </nav>
     <p class="num" style="font-size:14px;font-weight:400;color:var(--bark);margin-bottom:20px">{{ brojPozicija }} pozicija</p>
 
     <section v-for="g in filteredCategories" :key="g.id" style="margin-bottom:48px">
