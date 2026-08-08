@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PriceListController;
 use App\Http\Controllers\Api\PublicSettingsController;
+use App\Http\Controllers\Api\SupportChatController;
 use App\Http\Controllers\Api\SurchargeController;
 use App\Http\Controllers\Api\Technician\JobController as TechnicianJobController;
 use App\Http\Controllers\Api\Technician\PriceListController as TechnicianPriceListController;
@@ -36,6 +37,10 @@ Route::prefix('v1')->group(function () {
     Route::get('price-list', [PriceListController::class, 'index']);
     Route::get('surcharges', [SurchargeController::class, 'index']);
     Route::get('settings/public', [PublicSettingsController::class, 'show']);
+
+    // AI podrska na sajtu. Bez auth-a, pa je limit po IP-u jedina brana.
+    Route::post('support/chat', [SupportChatController::class, 'store'])
+        ->middleware('throttle:20,1');
 
     Route::post('auth/register', [AuthController::class, 'register']);
     Route::post('auth/login', [AuthController::class, 'login']);

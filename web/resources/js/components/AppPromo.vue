@@ -1,10 +1,11 @@
 <script setup>
 // Promocija mobilne aplikacije, jedna komponenta za sve plasmane.
-// Aplikacije još nisu objavljene: appLinks.js drži prazne URL-ove, pa dugmad
-// ovdje same prelaze sa toasta na prave linkove čim se store URL upiše.
+// Aplikacije još nisu objavljene: appLinks.js drži prazne URL-ove, pa badge-ovi
+// ovdje sami prelaze sa toasta na prave linkove čim se store URL upiše.
 import { computed } from 'vue';
 import { APP_STORE_URL, PLAY_STORE_URL, hasStoreLinks } from '../config/appLinks';
 import { useToastStore } from '../stores/toast';
+import StoreBadge from './StoreBadge.vue';
 
 const props = defineProps({
   // 'band' puna sekcija (Naslovna), 'inline' kompaktan red (potvrde), 'footer' mini dugmad.
@@ -25,9 +26,11 @@ const storesLive = hasStoreLinks();
 const onDark = computed(() => (props.dark === null ? props.variant !== 'inline' : props.dark));
 
 const badges = computed(() => [
-  { key: 'ios', big: 'iPhone', url: APP_STORE_URL },
-  { key: 'android', big: 'Android', url: PLAY_STORE_URL },
+  { key: 'apple', label: 'App Store', url: APP_STORE_URL },
+  { key: 'google', label: 'Google Play', url: PLAY_STORE_URL },
 ]);
+
+const badgeHeight = computed(() => (props.variant === 'footer' ? 40 : 52));
 
 function onBadgeClick(url) {
   if (url) return;
@@ -52,13 +55,11 @@ function onBadgeClick(url) {
             v-for="b in badges"
             :key="b.key"
             v-bind="b.url ? { href: b.url, target: '_blank', rel: 'noopener' } : { type: 'button' }"
-            class="app-badge"
-            :class="onDark ? 'app-badge-ivory' : 'app-badge-ink'"
-            :aria-label="b.url ? `Preuzmite HAUS za ${b.big}` : `HAUS za ${b.big} još nije u prodavnici aplikacija`"
+            class="store-badge-wrap"
+            :aria-label="b.url ? `Preuzmite HAUS: ${b.label}` : `HAUS još nije objavljen: ${b.label}`"
             @click="onBadgeClick(b.url)"
           >
-            <span class="app-badge-small">Preuzmite za</span>
-            <span class="app-badge-big">{{ b.big }}</span>
+            <StoreBadge :store="b.key" :height="badgeHeight" />
           </component>
         </div>
         <p v-if="message" style="font-size:14px;font-weight:400;color:var(--sand)">{{ message }}</p>
@@ -74,13 +75,11 @@ function onBadgeClick(url) {
         v-for="b in badges"
         :key="b.key"
         v-bind="b.url ? { href: b.url, target: '_blank', rel: 'noopener' } : { type: 'button' }"
-        class="app-badge app-badge-mini"
-        :class="onDark ? 'app-badge-ivory' : 'app-badge-ink'"
-        :aria-label="b.url ? `Preuzmite HAUS za ${b.big}` : `HAUS za ${b.big} još nije u prodavnici aplikacija`"
+        class="store-badge-wrap"
+        :aria-label="b.url ? `Preuzmite HAUS: ${b.label}` : `HAUS još nije objavljen: ${b.label}`"
         @click="onBadgeClick(b.url)"
       >
-        <span class="app-badge-small">Za</span>
-        <span class="app-badge-big">{{ b.big }}</span>
+        <StoreBadge :store="b.key" :height="badgeHeight" />
       </component>
     </div>
   </div>
@@ -97,13 +96,11 @@ function onBadgeClick(url) {
         v-for="b in badges"
         :key="b.key"
         v-bind="b.url ? { href: b.url, target: '_blank', rel: 'noopener' } : { type: 'button' }"
-        class="app-badge"
-        :class="onDark ? 'app-badge-ivory' : 'app-badge-ink'"
-        :aria-label="b.url ? `Preuzmite HAUS za ${b.big}` : `HAUS za ${b.big} još nije u prodavnici aplikacija`"
+        class="store-badge-wrap"
+        :aria-label="b.url ? `Preuzmite HAUS: ${b.label}` : `HAUS još nije objavljen: ${b.label}`"
         @click="onBadgeClick(b.url)"
       >
-        <span class="app-badge-small">Preuzmite za</span>
-        <span class="app-badge-big">{{ b.big }}</span>
+        <StoreBadge :store="b.key" :height="badgeHeight" />
       </component>
     </div>
   </div>
@@ -114,54 +111,16 @@ function onBadgeClick(url) {
   background: var(--ink);
   padding: 96px 0;
 }
-.app-badge {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2px;
+.store-badge-wrap {
+  display: block;
+  padding: 0;
   border: 0;
-  padding: 10px 18px;
-  min-width: 132px;
-  font-family: inherit;
+  background: transparent;
   cursor: pointer;
-  text-decoration: none;
-  transition: background .2s ease, color .2s ease, opacity .2s ease;
+  line-height: 0;
+  transition: opacity .2s ease;
 }
-.app-badge-mini {
-  padding: 8px 14px;
-  min-width: 104px;
-}
-.app-badge-ink {
-  background: var(--ink);
-  color: var(--ivory);
-}
-.app-badge-ink:hover {
-  background: var(--bark);
-}
-.app-badge-ivory {
-  background: var(--ivory);
-  color: var(--ink);
-}
-.app-badge-ivory:hover {
-  background: var(--sand);
-}
-.app-badge-small {
-  font-size: 11px;
-  font-weight: 400;
-  line-height: 1;
-  opacity: .85;
-}
-.app-badge-mini .app-badge-small {
-  font-size: 11px;
-}
-.app-badge-big {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: .01em;
-}
-.app-badge-mini .app-badge-big {
-  font-size: 14px;
+.store-badge-wrap:hover {
+  opacity: .8;
 }
 </style>

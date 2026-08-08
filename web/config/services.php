@@ -57,6 +57,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Anthropic (AI podrska)
+    |--------------------------------------------------------------------------
+    |
+    | Model za chat podrske na sajtu. Jeftin model, kratki odgovori.
+    | Bez kljuca endpoint vraca 503 i widget kaze da podrska nije dostupna.
+    |
+    */
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_SUPPORT_MODEL', 'claude-haiku-4-5'),
+        'max_tokens' => 1024,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Monri Payments
     |--------------------------------------------------------------------------
     |
