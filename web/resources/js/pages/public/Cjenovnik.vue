@@ -55,7 +55,7 @@ const bezPretplateNote = computed(() => {
 <template>
   <PublicLayout>
     <div class="container section-narrow">
-      <h1 class="page-h1" style="margin-bottom:20px">Cijene</h1>
+      <h1 class="page-h1" style="margin-bottom:20px">Cjenovnik</h1>
       <p class="lead" style="max-width:680px;margin-bottom:56px">Godišnje plaćanje, automatska obnova. Cijene su sa PDV-om. Popust ide na rad, nikad na materijal.</p>
 
       <div v-if="packages.length" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch;margin-bottom:80px">

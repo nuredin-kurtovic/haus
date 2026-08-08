@@ -63,8 +63,8 @@ onMounted(async () => {
         <h1 class="hero-h1" style="margin-bottom:28px">Pukla cijev.<br>Nestalo struje.<br>Vrata se ne zatvaraju.</h1>
         <p class="hero-sub" style="max-width:520px;margin-bottom:40px">Ne tražite majstora. Ne pregovarate cijenu. Ne čekate cijeli dan.</p>
         <div style="display:flex;gap:12px;margin-bottom:32px">
-          <RouterLink to="/cijene" class="btn btn-ember">Pogledajte pakete</RouterLink>
-          <RouterLink to="/cijene#cjenovnik-radova" class="btn btn-ghost-ink">Cjenovnik radova</RouterLink>
+          <RouterLink to="/cjenovnik" class="btn btn-ember">Pogledajte pakete</RouterLink>
+          <RouterLink to="/cjenovnik#cjenovnik-radova" class="btn btn-ghost-ink">Cjenovnik radova</RouterLink>
         </div>
         <p v-if="heroLinija" class="num" style="font-size:14px;font-weight:400;color:var(--bark);padding-bottom:80px">{{ heroLinija }}</p>
       </div>
@@ -88,7 +88,7 @@ onMounted(async () => {
     <section class="container section-top">
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:40px;gap:24px;flex-wrap:wrap">
         <h2 class="section-h2">Tri paketa. Godišnje plaćanje.</h2>
-        <RouterLink to="/cijene" style="font-size:15px;font-weight:600;text-decoration-thickness:2px">Detaljna uporedba</RouterLink>
+        <RouterLink to="/cjenovnik" style="font-size:15px;font-weight:600;text-decoration-thickness:2px">Detaljna uporedba</RouterLink>
       </div>
       <div v-if="packages.length" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch">
         <PackageCard v-for="pkg in packages" :key="pkg.id" :pkg="pkg" :recommended="pkg.slug === 'haus-plus'" />

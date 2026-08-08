@@ -95,7 +95,7 @@ async function onCancel() {
       <div v-else-if="notFound" style="border:1px solid var(--sand);background:var(--ivory);padding:40px;max-width:640px">
         <h2 style="font-size:22px;font-weight:600;margin-bottom:10px">Nemate pretplatu</h2>
         <p style="font-size:16px;font-weight:400;color:var(--bark);line-height:1.55;margin-bottom:20px">Odaberite paket da biste imali termine, garanciju i cjenovnik sa popustom.</p>
-        <RouterLink to="/cijene" class="btn btn-ember">Pogledajte pakete</RouterLink>
+        <RouterLink to="/cjenovnik" class="btn btn-ember">Pogledajte pakete</RouterLink>
       </div>
 
       <div v-else-if="error && !subscription" class="error-panel" style="max-width:560px">

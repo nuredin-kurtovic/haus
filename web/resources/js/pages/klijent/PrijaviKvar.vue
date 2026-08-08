@@ -137,7 +137,7 @@ const forbiddenCta = computed(() => {
   const s = forbidden.value?.subscriptionStatus;
   if (s === 'istekla' || s === 'otkazana') return { to: '/klijent/pretplata', label: 'Idite na pretplatu' };
   if (s === 'cekanje_uplate' || s === 'ponuda') return { to: '/klijent/pretplata', label: 'Provjerite stanje pretplate' };
-  return { to: '/cijene', label: 'Pogledajte pakete' };
+  return { to: '/cjenovnik', label: 'Pogledajte pakete' };
 });
 
 async function submit() {

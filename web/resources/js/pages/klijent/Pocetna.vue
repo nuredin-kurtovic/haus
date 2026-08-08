@@ -106,7 +106,7 @@ const kartonStavke = computed(() => (dashboard.value?.recent_jobs || []).slice(0
         <div v-else style="border:1px solid var(--sand);background:var(--ivory);padding:32px;margin-bottom:32px">
           <h2 style="font-size:20px;font-weight:600;margin-bottom:10px">Nemate pretplatu</h2>
           <p style="font-size:15px;font-weight:400;color:var(--bark);line-height:1.55;margin-bottom:16px">Da biste prijavili kvar i vidjeli HAUS Karton, prvo je potrebna aktivna pretplata.</p>
-          <RouterLink to="/cijene" class="btn btn-ember">Pogledajte pakete</RouterLink>
+          <RouterLink to="/cjenovnik" class="btn btn-ember">Pogledajte pakete</RouterLink>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 400px;gap:32px;align-items:start">
