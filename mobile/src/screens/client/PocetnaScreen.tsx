@@ -29,6 +29,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import StateChip from '../../components/StateChip';
@@ -70,13 +71,14 @@ export function PocetnaScreen() {
     : [];
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl refreshing={query.isFetching} onRefresh={() => query.refetch()} />
-      }
-    >
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={query.isFetching} onRefresh={() => query.refetch()} />
+        }
+      >
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.greetingSmall}>Dobar dan,</Text>
@@ -204,7 +206,8 @@ export function PocetnaScreen() {
           </>
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

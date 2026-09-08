@@ -25,6 +25,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import StateChip from '../../components/StateChip';
@@ -32,7 +33,7 @@ import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErro
 import { useTechnicianJobsQuery } from '../../api/queries';
 import { dateGroupLabel, formatDateTime, formatWindowRange } from '../../utils/format';
 import { chipStateForJob } from '../../utils/jobs';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { JobStatus } from '../../api/types';
 import type { TechnicianJobListItem } from '../../api/types';
 import type { TechnicianNaloziStackParamList } from '../../navigation/types';
@@ -123,7 +124,7 @@ export function MojiNaloziScreen() {
   }, [visibleJobs]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headline}>Moji nalozi</Text>
         <FlatList
@@ -208,7 +209,7 @@ export function MojiNaloziScreen() {
           );
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -278,6 +279,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 8,
+    ...numeric,
   },
   row: {
     flexDirection: 'row',

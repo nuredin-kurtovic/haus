@@ -21,6 +21,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import StateChip from '../../components/StateChip';
@@ -64,7 +65,7 @@ export function NaloziScreen() {
   const counts = query.data?.pages[0]?.meta.counts;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headline}>Nalozi</Text>
         <TextInput
@@ -160,7 +161,7 @@ export function NaloziScreen() {
           ) : null
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

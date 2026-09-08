@@ -25,13 +25,14 @@
 
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../../components/Button';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
 import { useCancelSubscriptionMutation, useClientSubscriptionQuery } from '../../api/queries';
 import { formatDate } from '../../utils/format';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { InvoiceStatus, InvoiceType, SubscriptionPayment } from '../../api/types';
 import type { PretplataStackParamList } from '../../navigation/types';
 
@@ -86,20 +87,20 @@ export function PretplataScreen() {
 
   if (query.isLoading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <QueryLoadingNotice label="Učitavanje pretplate..." />
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (query.isError || !subscription) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <QueryErrorNotice
           message="Nije moguće učitati pretplatu. Provjerite internet vezu."
           onRetry={() => query.refetch()}
         />
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -117,7 +118,8 @@ export function PretplataScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.headerPlane}>
         <Text style={styles.headerEyebrow}>Vaš paket</Text>
         <View style={styles.headerTopRow}>
@@ -207,7 +209,8 @@ export function PretplataScreen() {
         )}
         {!!cancelMessage && <Text style={styles.cancelMessage}>{cancelMessage}</Text>}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -337,6 +340,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: colors.bark,
+    ...numeric,
   },
   emptyText: {
     fontFamily: fontFamily.regular,
@@ -367,6 +371,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.ink,
     marginBottom: 3,
+    ...numeric,
   },
   paymentMeta: {
     fontFamily: fontFamily.regular,

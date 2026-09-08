@@ -10,6 +10,8 @@
  * borderRadius).
  */
 
+import type { TextStyle } from 'react-native';
+
 export const colors = {
   ink: '#252422',
   ember: '#FE5100',
@@ -170,3 +172,8 @@ export const stateChipStyles = {
  * lifecycle-a, ali vizuelno dijeli isti chip sistem.
  */
 export type ChipState = keyof typeof stateChipStyles;
+
+/** Cifre uvijek tabular-nums (ugovorno pravilo brenda). Dodati na svaki Text koji prikazuje brojeve. */
+export const numeric: { fontVariant: TextStyle['fontVariant'] } = {
+  fontVariant: ['tabular-nums'],
+};

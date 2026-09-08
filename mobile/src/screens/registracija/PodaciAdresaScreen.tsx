@@ -39,7 +39,7 @@ import SelectField from '../../components/SelectField';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
 import { useActiveCities } from '../../api/queries';
 import { useRegistrationStore, type PropertyDraft } from '../../store/registration';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { RootStackParamList } from '../../navigation/types';
 import type { VolumeDiscountTier } from '../../api/types';
 
@@ -403,6 +403,7 @@ const styles = StyleSheet.create({
   stepLabel: {
     ...typeScale.eyebrow,
     color: colors.bark,
+    ...numeric,
   },
   progressRow: {
     marginBottom: 26,
@@ -438,6 +439,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: colors.bark,
+    ...numeric,
   },
   stepperRow: {
     borderWidth: 1,
@@ -459,6 +461,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.bark,
     marginTop: 2,
+    ...numeric,
   },
   stepperControls: {
     flexDirection: 'row',

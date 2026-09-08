@@ -39,6 +39,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -54,7 +55,7 @@ import {
 import { ApiError } from '../../api/client';
 import { formatDate, formatDateTime, formatTime } from '../../utils/format';
 import { chipStateForJob } from '../../utils/jobs';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { DispatcherNaloziStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<DispatcherNaloziStackParamList, 'NalogDodjela'>;
@@ -250,7 +251,7 @@ export function NalogDodjelaScreen() {
   const errorEntries = Object.entries(errors);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backGlyph}>‹</Text>
@@ -392,7 +393,7 @@ export function NalogDodjelaScreen() {
                   <Text style={styles.previewBody}>Nije moguće učitati pregled obavještenja.</Text>
                 )}
                 {!!previewQuery.data && (
-                  <Text style={styles.previewBody}>{previewQuery.data.data.body}</Text>
+                  <Text style={[styles.previewBody, numeric]}>{previewQuery.data.data.body}</Text>
                 )}
               </View>
 
@@ -425,7 +426,7 @@ export function NalogDodjelaScreen() {
           )}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -597,6 +598,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.bark,
     marginBottom: 6,
+    ...numeric,
   },
   endValue: {
     fontFamily: fontFamily.semiBold,

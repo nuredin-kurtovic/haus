@@ -28,7 +28,7 @@ import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErro
 import { usePackagesQuery } from '../../api/queries';
 import { useRegistrationStore } from '../../store/registration';
 import { pluralize } from '../../utils/plural';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { RootStackParamList } from '../../navigation/types';
 import type { Package } from '../../api/types';
 
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
   stepLabel: {
     ...typeScale.eyebrow,
     color: colors.bark,
+    ...numeric,
   },
   progressRow: {
     marginBottom: 26,
@@ -234,6 +235,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: colors.bark,
+    ...numeric,
     borderTopWidth: 1,
     borderTopColor: colors.sand,
     paddingTop: 11,

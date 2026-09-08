@@ -26,11 +26,12 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
 import { useClientPriceListQuery } from '../../api/queries';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { PretplataStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<PretplataStackParamList, 'Cjenovnik'>;
@@ -60,7 +61,7 @@ export function CjenovnikScreen() {
   }, [categories, categoryFilter, search]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
           <Pressable
@@ -104,6 +105,7 @@ export function CjenovnikScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.chipsScroll}
             contentContainerStyle={styles.chipsRow}
           >
             {[{ id: ALL_CHIP_ID, name: 'Sve' }, ...categories].map((category) => {
@@ -154,7 +156,7 @@ export function CjenovnikScreen() {
           </ScrollView>
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -197,6 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: colors.bark,
+    ...numeric,
   },
   searchWrap: {
     paddingHorizontal: 22,
@@ -212,9 +215,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.ink,
   },
+  chipsScroll: {
+    // Horizontalni ScrollView ne raste po vertikalnom paddingu contentContainera,
+    // pa razmak nosi style: inace se chipovi preklope sa naslovom sekcije ispod.
+    flexGrow: 0,
+    marginTop: 14,
+    marginBottom: 18,
+  },
   chipsRow: {
     paddingHorizontal: 22,
-    paddingVertical: 14,
     gap: 8,
   },
   chip: {

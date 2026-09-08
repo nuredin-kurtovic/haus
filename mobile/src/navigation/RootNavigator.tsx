@@ -40,7 +40,8 @@ export function RootNavigator() {
   }, [hydrate]);
 
   if (isHydrating) {
-    // Kratkotrajno praznо platno dok se čita keychain / poziva /me.
+    // Ember platno dok se čita keychain / poziva /me: nastavlja se na launch
+    // splash (ista ploha), pa nema bijelog bljeska izmedju splasha i prvog ekrana.
     return <View style={styles.splash} />;
   }
 
@@ -74,7 +75,7 @@ export function RootNavigator() {
 const styles = StyleSheet.create({
   splash: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.ember,
   },
 });
 

@@ -24,13 +24,14 @@
 
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../../components/Button';
 import { formatDateTime } from '../../utils/format';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { ClientTabParamList, PrijaviStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<PrijaviStackParamList, 'PrijavaPrimljena'>;
@@ -45,12 +46,13 @@ export function PrijavaPrimljenaScreen() {
   const rows: Array<{ k: string; v: string }> = [
     { k: 'Kategorija', v: category },
     { k: 'Hitno', v: isEmergency ? 'Da' : 'Ne' },
-    { k: 'Termin', v: preferredWindow },
+    // Bez zeljenog termina red kaze sta slijedi, umjesto praznog polja.
+    { k: 'Termin', v: preferredWindow || 'Potvrda stiže u aplikaciji' },
     { k: 'Rok', v: formatDateTime(deadlineAt) ?? deadlineAt },
   ];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.plane}>
         <View style={styles.chip}>
           <Text style={styles.chipLabel}>Primljeno</Text>
@@ -87,7 +89,7 @@ export function PrijavaPrimljenaScreen() {
           style={styles.backButton}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -162,6 +164,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: colors.bark,
+    ...numeric,
   },
   backButton: {
     marginTop: 'auto',

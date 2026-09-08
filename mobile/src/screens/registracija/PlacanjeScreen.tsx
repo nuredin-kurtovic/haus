@@ -37,7 +37,7 @@ import { useCitiesQuery } from '../../api/queries';
 import { useAuthStore } from '../../store/auth';
 import { useRegistrationStore } from '../../store/registration';
 import { ApiError } from '../../api/client';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { RootStackParamList } from '../../navigation/types';
 import type { PaymentMethod, RegisterRequest, VolumeDiscountTier } from '../../api/types';
 
@@ -272,6 +272,7 @@ const styles = StyleSheet.create({
   stepLabel: {
     ...typeScale.eyebrow,
     color: colors.bark,
+    ...numeric,
   },
   progressRow: {
     marginBottom: 26,

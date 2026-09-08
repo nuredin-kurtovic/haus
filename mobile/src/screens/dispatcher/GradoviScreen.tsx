@@ -31,6 +31,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/Button';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
 import { useAdminCitiesQuery, useCreateCityMutation, useUpdateCityMutation } from '../../api/queries';
@@ -136,13 +137,14 @@ export function GradoviScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl refreshing={citiesQuery.isFetching} onRefresh={() => citiesQuery.refetch()} />
-      }
-    >
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={citiesQuery.isFetching} onRefresh={() => citiesQuery.refetch()} />
+        }
+      >
       <View style={styles.header}>
         <Text style={styles.headline}>Gradovi</Text>
         <Text style={styles.meta}>
@@ -234,7 +236,8 @@ export function GradoviScreen() {
           </Text>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

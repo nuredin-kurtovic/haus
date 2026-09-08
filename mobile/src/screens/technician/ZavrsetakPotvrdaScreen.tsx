@@ -18,7 +18,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../../components/Button';
 import { formatDate } from '../../utils/format';
-import { colors, fontFamily, spacing } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing } from '../../theme/tokens';
 import type { TechnicianNaloziStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<TechnicianNaloziStackParamList, 'ZavrsetakPotvrda'>;
@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 25,
     color: colors.ink,
+    ...numeric,
   },
   rows: {
     borderTopWidth: 1,

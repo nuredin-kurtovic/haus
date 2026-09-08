@@ -47,6 +47,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -61,7 +62,7 @@ import {
   useCreateJobMutation,
 } from '../../api/queries';
 import { ApiError } from '../../api/client';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { ClientTabParamList, PrijaviStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<PrijaviStackParamList, 'PrijaviKvar'>;
@@ -245,7 +246,7 @@ export function PrijaviScreen() {
     (subscriptionQuery.isError && !subscription) || (priceListQuery.isError && categories.length === 0);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.backRow}>
           <Pressable
@@ -416,7 +417,7 @@ export function PrijaviScreen() {
           {step === 3 && (
             <View style={styles.stepBlock}>
               <Text style={styles.headline}>Kad vam odgovara?</Text>
-              <Text style={styles.paragraph}>{rokTekst}</Text>
+              <Text style={[styles.paragraph, numeric]}>{rokTekst}</Text>
               <View style={styles.terminList}>
                 {TERMIN_OPTIONS.map((option) => {
                   const isSelected = preferredWindow === option.value;
@@ -456,7 +457,7 @@ export function PrijaviScreen() {
           )}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -642,6 +643,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     color: colors.bark,
+    ...numeric,
   },
   terminList: {
     gap: 8,

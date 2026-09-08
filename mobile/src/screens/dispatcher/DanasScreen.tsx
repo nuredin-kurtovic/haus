@@ -23,12 +23,13 @@
 
 import React from 'react';
 import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
 import { useAdminDashboardQuery } from '../../api/queries';
 import { formatDateTime } from '../../utils/format';
-import { colors, fontFamily, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, typeScale } from '../../theme/tokens';
 import type { AdminJobListItem } from '../../api/types';
 import type { DispatcherTabParamList } from '../../navigation/types';
 
@@ -66,7 +67,8 @@ export function DanasScreen() {
     : [];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeAreaInk} edges={['top']}>
+      <View style={styles.container}>
       <View style={styles.inkHeader}>
         <View style={styles.inkTopRow}>
           <Image
@@ -158,11 +160,16 @@ export function DanasScreen() {
           </>
         )}
       </ScrollView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaInk: {
+    flex: 1,
+    backgroundColor: colors.ink,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.white,
@@ -267,6 +274,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.ink,
     marginBottom: 2,
+    ...numeric,
   },
   deadlineMeta: {
     fontFamily: fontFamily.regular,

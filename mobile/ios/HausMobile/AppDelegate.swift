@@ -29,6 +29,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
+    // Ember iza React root viewa: bez bijelog bljeska izmedju splasha i prvog framea.
+    let ember = UIColor(red: 254.0 / 255.0, green: 81.0 / 255.0, blue: 0.0, alpha: 1.0)
+    window?.backgroundColor = ember
+    window?.rootViewController?.view.backgroundColor = ember
+
     return true
   }
 }

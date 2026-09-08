@@ -1,0 +1,4 @@
+<resources>
+    <!-- Ember, brend ploha. Splash pozadina na svim verzijama Androida. -->
+    <color name="splash_background">#FE5100</color>
+</resources>

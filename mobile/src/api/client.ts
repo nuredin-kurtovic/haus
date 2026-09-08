@@ -19,7 +19,7 @@ import type { ApiValidationError } from './types';
  * gađati LAN IP. Radi i na iOS simulatoru (dijeli mrežu sa hostom).
  * Promijeni kad se promijeni mreža (ipconfig getifaddr en0).
  */
-const DEV_HOST = '192.168.1.93';
+const DEV_HOST = '192.168.1.189';
 
 export const API_BASE_URL = Platform.select({
   ios: `http://${DEV_HOST}:8000/api/v1`,

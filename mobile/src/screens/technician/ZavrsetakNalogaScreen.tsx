@@ -31,6 +31,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -40,7 +41,7 @@ import ProgressBar from '../../components/ProgressBar';
 import { QueryErrorNotice, QueryLoadingNotice } from '../../components/QueryErrorNotice';
 import { useCompleteTechnicianJobMutation, useTechnicianPriceListQuery } from '../../api/queries';
 import { ApiError } from '../../api/client';
-import { colors, fontFamily, spacing, typeScale } from '../../theme/tokens';
+import { colors, fontFamily, numeric, spacing, typeScale } from '../../theme/tokens';
 import type { TechnicianPriceItem } from '../../api/types';
 import type { TechnicianNaloziStackParamList } from '../../navigation/types';
 
@@ -259,7 +260,7 @@ export function ZavrsetakNalogaScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.backRow}>
           <Pressable accessibilityRole="button" onPress={goBack} style={styles.backButton}>
@@ -276,7 +277,7 @@ export function ZavrsetakNalogaScreen() {
         {step === 1 && (
           <View style={styles.stepBlock}>
             <Text style={styles.headline}>Šta ste zatekli i šta ste uradili?</Text>
-            <Text style={styles.paragraph}>
+            <Text style={[styles.paragraph, numeric]}>
               Nalaz ide klijentu u izvještaju. Najmanje 10 znakova.
             </Text>
             <TextInput
@@ -510,7 +511,7 @@ export function ZavrsetakNalogaScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -543,6 +544,7 @@ const styles = StyleSheet.create({
   stepLabel: {
     ...typeScale.eyebrow,
     color: colors.bark,
+    ...numeric,
   },
   progressRow: {
     marginBottom: 24,
@@ -605,6 +607,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.ink,
     flex: 1,
+    ...numeric,
   },
   selectedPrice: {
     fontFamily: fontFamily.semiBold,
